@@ -1,0 +1,16 @@
+{
+    "name": "Clickgo Native",
+    "ver": 1,
+    "version": "0.1",
+    "author": "clickgo",
+
+    "controls": [
+        "/clickgo/control/common",
+        "/clickgo/control/form"
+    ],
+    "main": "/package/form/main",
+
+    "files": [
+        "/form/main.xml"
+    ]
+}
