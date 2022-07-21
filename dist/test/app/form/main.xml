@@ -1,3 +1,5 @@
-<form width="400" height="550" title="ClickGo Native">
-    
+<form width="400" height="500" title="ClickGo Native">
+    <layout style="flex: 1;" align-v="center" align-h="center">
+        <button style="padding: 50px 80px;">Hello</button>
+    </layout>
 </form>

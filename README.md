@@ -5,10 +5,10 @@
 [![npm version](https://img.shields.io/npm/v/clickgo-native.svg?colorB=brightgreen)](https://www.npmjs.com/package/clickgo-native "Stable Version")
 [![npm version](https://img.shields.io/npm/v/clickgo-native/dev.svg)](https://www.npmjs.com/package/clickgo-native "Development Version")
 [![npm version](https://img.shields.io/npm/v/clickgo-native/beta.svg)](https://www.npmjs.com/package/clickgo-native "Beta Version")
-[![License](https://img.shields.io/github/license/maiyun/ClickGo Native.svg)](https://github.com/MaiyunNET/ClickGo Native/blob/master/LICENSE)
-[![GitHub issues](https://img.shields.io/github/issues/maiyun/ClickGo Native.svg)](https://github.com/MaiyunNET/ClickGo Native/issues)
-[![GitHub Releases](https://img.shields.io/github/release/maiyun/ClickGo Native.svg)](https://github.com/MaiyunNET/ClickGo Native/releases "Stable Release")
-[![GitHub Pre-Releases](https://img.shields.io/github/release/maiyun/ClickGo Native/all.svg)](https://github.com/MaiyunNET/ClickGo Native/releases "Pre-Release")
+[![License](https://img.shields.io/github/license/maiyun/clickGo-native.svg)](https://github.com/maiyun/clickgo-native/blob/master/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/maiyun/clickgo-native.svg)](https://github.com/maiyun/clickgo-native/issues)
+[![GitHub Releases](https://img.shields.io/github/release/maiyun/clickgo-native.svg)](https://github.com/maiyun/clickgo-native/releases "Stable Release")
+[![GitHub Pre-Releases](https://img.shields.io/github/release/maiyun/clickgo-native/all.svg)](https://github.com/maiyun/clickgo-native/releases "Pre-Release")
 
 The software developed with ClickGo will run in Windows, Mac OS, Linux.
 

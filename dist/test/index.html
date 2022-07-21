@@ -1,10 +1,11 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>ClickGo Test</title>
+<title>ClickGo Native Test</title>
 <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
-<script src="https://cdn.jsdelivr.net/npm/@litert/loader@3.2.0/dist/loader.min.js?path=browser"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/@litert/loader@3.3.0/dist/loader.min.js?path=browser&map={'clickgo':'../../../ClickGo/dist/index.js'}"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/@litert/loader@3.3.0/dist/loader.min.js?path=browser&npm={'clickgo':'3.0.6-dev7'}"></script>
 <link href="index.css" rel="stylesheet">
 </head>
 <body>
@@ -12,8 +13,13 @@
     <div id="box">
         <div class="title">ClickGo Native</div>
         <div class="content">Loading...</div>
-        <div id="progress"></div>
+        <div id="progress" style="width: 0%;"></div>
     </div>
 </div>
+<script>
+setTimeout(function() {
+    document.getElementById('progress').style.width = '20%';
+}, 50);
+</script>
 </body>
 </html>
