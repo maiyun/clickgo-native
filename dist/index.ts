@@ -5,6 +5,7 @@ export const fs = libFs;
 import * as libTool from './lib/tool';
 export const tool = libTool;
 
+// npm publish --tag dev --access public
 // --- sass --watch dist/:dist/ --style compressed --no-source-map ---
 
 /** --- 是否是沉浸式的 --- */
