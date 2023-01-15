@@ -1,7 +1,11 @@
 import * as native from '../index';
 
-native.ready().then(function() {
-    native.run('./index.html');
-}).catch(function(e) {
-    console.log(e);
-});
+class Boot extends native.AbstractBoot {
+
+    public main(): void {
+        this.run('./index.html');
+    }
+
+}
+
+native.launcher(new Boot());

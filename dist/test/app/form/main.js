@@ -23,9 +23,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const electron = __importStar(require("electron"));
-electron.contextBridge.exposeInMainWorld('clickgoNative', {
-    invoke: function (name, ...param) {
-        return electron.ipcRenderer.invoke('pre', name, ...param);
+const clickgo = __importStar(require("clickgo"));
+class default_1 extends clickgo.form.AbstractForm {
+    constructor() {
+        super(...arguments);
+        this.a = '';
     }
-});
+}
+exports.default = default_1;

@@ -11,6 +11,8 @@
     "main": "/package/form/main",
 
     "files": [
-        "/form/main.xml"
+        "/form/main.js",
+        "/form/main.xml",
+        "/app.js"
     ]
 }

@@ -5,7 +5,7 @@
 [![npm version](https://img.shields.io/npm/v/clickgo-native.svg?colorB=brightgreen)](https://www.npmjs.com/package/clickgo-native "Stable Version")
 [![npm version](https://img.shields.io/npm/v/clickgo-native/dev.svg)](https://www.npmjs.com/package/clickgo-native "Development Version")
 [![npm version](https://img.shields.io/npm/v/clickgo-native/beta.svg)](https://www.npmjs.com/package/clickgo-native "Beta Version")
-[![License](https://img.shields.io/github/license/maiyun/clickGo-native.svg)](https://github.com/maiyun/clickgo-native/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/maiyun/clickgo-native.svg)](https://github.com/maiyun/clickgo-native/blob/master/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/maiyun/clickgo-native.svg)](https://github.com/maiyun/clickgo-native/issues)
 [![GitHub Releases](https://img.shields.io/github/release/maiyun/clickgo-native.svg)](https://github.com/maiyun/clickgo-native/releases "Stable Release")
 [![GitHub Pre-Releases](https://img.shields.io/github/release/maiyun/clickgo-native/all.svg)](https://github.com/maiyun/clickgo-native/releases "Pre-Release")
@@ -17,45 +17,26 @@ The software developed with ClickGo will run in Windows, Mac OS, Linux.
 You can install directly using NPM:
 
 ```sh
-$ npm i clickgo --save
+$ npm i clickgo-native --save
 ```
 
 Or install the developing (unstable) version for newest features:
 
 ```sh
-$ npm i clickgo@dev --save
-```
-
-**index.html**
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/@litert/loader@3.2.0/dist/loader.min.js?path=index"></script>
-```
-
-**index.js**
-
-```typescript
-import * as clickgo from 'clickgo';
-async function run(): Promise<void> {
-    await clickgo.init();
-    await clickgo.task.run('app/');
-}
+$ npm i clickgo-native@dev --save
 ```
 
 **Node**
 
 ```typescript
 import * as native from 'clickgo-native';
-native.ready().then(function() {
-    native.run('./index.html');
-}).catch(function(e) {
-    console.log(e);
-});
+class Boot extends native.AbstractBoot {
+    public main(): void {
+        this.run('./index.html');
+    }
+}
+native.launcher(new Boot());
 ```
-
-## Note
-
-ClickGo demand loading Vue, jszip, resize-observer, but **DO NOT** reference these JS and CSS files. ClickGo will automatically reference. You only need to import "clickgo" module.
 
 ## Demo
 
