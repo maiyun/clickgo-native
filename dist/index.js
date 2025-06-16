@@ -84,7 +84,7 @@ const methods = {
     'cg-set-state': {
         'once': false,
         handler: function (t, state) {
-            if (hasFrame || !form || !state) {
+            if (!hasFrame || !form || !state) {
                 return;
             }
             if (!verifyToken(t)) {
@@ -104,6 +104,24 @@ const methods = {
                 }
             }
         }
+    },
+    'cg-activate': {
+        'once': false,
+        handler: function (t) {
+            if (!form) {
+                return;
+            }
+            if (!verifyToken(t)) {
+                return;
+            }
+            if (form.isMinimized()) {
+                form.restore();
+            }
+            form.setAlwaysOnTop(true);
+            form.show();
+            form.focus();
+            form.setAlwaysOnTop(false);
+        },
     },
     'cg-close': {
         'once': false,
@@ -397,7 +415,7 @@ function createForm(p) {
             'preload': path.join(__dirname, '/pre.js')
         },
         'width': hasFrame ? 800 : 500,
-        'height': hasFrame ? 600 : 300,
+        'height': hasFrame ? 700 : 300,
         'frame': hasFrame,
         'resizable': false,
         'show': false,
