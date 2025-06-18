@@ -1,6 +1,6 @@
 {
   "name": "clickgo-native",
-  "version": "0.0.4-dev4",
+  "version": "0.0.5-dev5",
   "description": "The software developed with ClickGo will run in Windows, Mac OS, Linux.",
   "keywords": [
     "clickgo",
@@ -14,14 +14,14 @@
     "native": "electron ./dist/test"
   },
   "devDependencies": {
-    "@litert/eslint-plugin-rules": "^0.1.2",
-    "@litert/loader": "^3.4.6",
-    "@types/jszip": "^3.4.1",
-    "@types/node": "^18.11.14",
-    "clickgo": "^3.1.6-dev15",
-    "typescript": "^4.9.4"
+    "@litert/eslint-plugin-rules": "^0.3.1",
+    "@litert/loader": "^3.5.9",
+    "@types/node": "^24.0.3",
+    "clickgo": "^3.16.16",
+    "jszip": "^3.10.1",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
-    "electron": "^22.0.2"
+    "electron": "^36.4.0"
   }
 }
