@@ -504,7 +504,7 @@ function createForm(p: string): void {
         }
         form.show();
     });
-    if (p.startsWith('https://')) {
+    if (p.startsWith('https://') || p.startsWith('http://')) {
         // --- 加载网页 ---
         form.loadURL(p).catch(function(e): void {
             throw e;
