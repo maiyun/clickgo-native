@@ -7,17 +7,13 @@
         "sourceMap": false,
         "target": "ES2015",
         "strict": true,             // 严格模式
-        "declaration": false,       // d.ts
+        "declaration": true,        // d.ts
         "declarationMap": false,    // d.ts 的 map
         "newLine": "LF",
         "paths": {
             "~/*": ["./*"]
         },
         "resolveJsonModule": true,
-        "typeRoots": [
-            "./node_modules/@types",
-            "./node_modules/@litert/loader"
-        ],
         "esModuleInterop": true
     },
     "include": [
