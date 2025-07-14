@@ -96,7 +96,7 @@ const methods = {
     'cg-set-state': {
         'once': false,
         handler: function (t, state) {
-            if (!hasFrame || !form || !state) {
+            if (!form || !state) {
                 return;
             }
             if (!verifyToken(t)) {

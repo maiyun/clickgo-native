@@ -28,14 +28,14 @@ class Boot extends clickgo.AbstractBoot {
                 }
                 block.style.width = ((loaded + 1) / (total + 1) * 100).toString() + '%';
             },
-            'permissions': ['root']
+            'permissions': ['root'],
         });
         console.log('taskId', taskId);
         document.getElementById('main')?.remove();
     }
 
     public onError(taskId: number, formId: number, error: Error, info: string): void {
-        console.log(info, error);
+        console.log(taskId, formId, error, info);
     }
 
 }

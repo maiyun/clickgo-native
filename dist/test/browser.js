@@ -71,14 +71,14 @@ class Boot extends clickgo.AbstractBoot {
                     }
                     block.style.width = ((loaded + 1) / (total + 1) * 100).toString() + '%';
                 },
-                'permissions': ['root']
+                'permissions': ['root'],
             });
             console.log('taskId', taskId);
             (_a = document.getElementById('main')) === null || _a === void 0 ? void 0 : _a.remove();
         });
     }
     onError(taskId, formId, error, info) {
-        console.log(info, error);
+        console.log(taskId, formId, error, info);
     }
 }
 clickgo.launcher(new Boot());

@@ -72,11 +72,11 @@ const methods: Record<string, {
             form.center();
         }
     },
-    // --- 设置窗体最大化、最小化、还原，仅非 frame 可设置 ---
+    // --- 设置窗体最大化、最小化、还原 ---
     'cg-set-state': {
         'once': false,
         handler: function(t: string, state: string): void {
-            if (!hasFrame || !form || !state) {
+            if (!form || !state) {
                 return;
             }
             if (!verifyToken(t)) {
