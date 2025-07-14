@@ -1,6 +1,6 @@
 {
   "name": "clickgo-native",
-  "version": "0.0.7-dev7",
+  "version": "0.0.8",
   "description": "The software developed with ClickGo will run in Windows, Mac OS, Linux.",
   "keywords": [
     "clickgo",
