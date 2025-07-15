@@ -96,7 +96,7 @@ const methods = {
     'cg-set-state': {
         'once': false,
         handler: function (t, state) {
-            if (!form || !state) {
+            if (!hasFrame || !form || !state) {
                 return;
             }
             if (!verifyToken(t)) {
@@ -308,6 +308,68 @@ const methods = {
             });
         }
     },
+    'cg-form-open': {
+        'once': false,
+        handler: function (t, options = {}) {
+            var _a, _b, _c, _d, _e;
+            var _f, _g, _h;
+            if (!t || !form) {
+                return null;
+            }
+            if (!verifyToken(t)) {
+                return null;
+            }
+            (_a = options.filters) !== null && _a !== void 0 ? _a : (options.filters = []);
+            (_b = options.props) !== null && _b !== void 0 ? _b : (options.props = {});
+            (_c = (_f = options.props).file) !== null && _c !== void 0 ? _c : (_f.file = true);
+            (_d = (_g = options.props).directory) !== null && _d !== void 0 ? _d : (_g.directory = false);
+            (_e = (_h = options.props).multi) !== null && _e !== void 0 ? _e : (_h.multi = false);
+            const paths = electron.dialog.showOpenDialogSync(form, {
+                'defaultPath': options.path ? exports.tool.formatPath(options.path) : undefined,
+                'filters': options.filters.map((item) => {
+                    return {
+                        'name': item.name,
+                        'extensions': item.accept,
+                    };
+                }),
+                'properties': [
+                    options.props.file ? 'openFile' : '',
+                    options.props.directory ? 'openDirectory' : '',
+                    options.props.multi ? 'multiSelections' : '',
+                ].filter(item => item),
+            });
+            if (!paths) {
+                return null;
+            }
+            return paths.map(item => exports.tool.parsePath(item));
+        }
+    },
+    'cg-form-save': {
+        'once': false,
+        handler: function (t, options = {}) {
+            var _a;
+            if (!t || !form) {
+                return null;
+            }
+            if (!verifyToken(t)) {
+                return null;
+            }
+            (_a = options.filters) !== null && _a !== void 0 ? _a : (options.filters = []);
+            const path = electron.dialog.showSaveDialogSync(form, {
+                'defaultPath': options.path ? exports.tool.formatPath(options.path) : undefined,
+                'filters': options.filters.map((item) => {
+                    return {
+                        'name': item.name,
+                        'extensions': item.accept,
+                    };
+                }),
+            });
+            if (!path) {
+                return null;
+            }
+            return exports.tool.parsePath(path);
+        }
+    },
     'cg-ping': {
         'once': false,
         handler: function (t) {
@@ -446,23 +508,16 @@ function createForm(p) {
         }
         form.show();
     });
-    if (p.startsWith('https://') || p.startsWith('http://')) {
-        form.loadURL(p).catch(function (e) {
-            throw e;
-        });
+    const lio = p.indexOf('?');
+    const search = lio === -1 ? '' : p.slice(lio + 1);
+    if (lio !== -1) {
+        p = p.slice(0, lio);
     }
-    else {
-        const lio = p.indexOf('?');
-        const search = lio === -1 ? '' : p.slice(lio + 1);
-        if (lio !== -1) {
-            p = p.slice(0, lio);
-        }
-        form.loadFile(p, {
-            'search': search
-        }).catch(function (e) {
-            throw e;
-        });
-    }
+    form.loadFile(p, {
+        'search': search
+    }).catch(function (e) {
+        throw e;
+    });
     form.on('close', function () {
         form = undefined;
     });

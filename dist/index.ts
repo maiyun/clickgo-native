@@ -72,11 +72,11 @@ const methods: Record<string, {
             form.center();
         }
     },
-    // --- 设置窗体最大化、最小化、还原 ---
+    // --- 设置窗体最大化、最小化、还原，仅非 frame 可设置 ---
     'cg-set-state': {
         'once': false,
         handler: function(t: string, state: string): void {
-            if (!form || !state) {
+            if (!hasFrame || !form || !state) {
                 return;
             }
             if (!verifyToken(t)) {
@@ -275,6 +275,95 @@ const methods: Record<string, {
                 return false;
             }
             return fs.copyFile(src, dest);
+        }
+    },
+
+    // --- form ---
+
+    'cg-form-open': {
+        'once': false,
+        handler: function(t: string, options: {
+            /** --- 默认路径 --- */
+            'path'?: string;
+            /** --- 筛选的文件类型 --- */
+            'filters'?: Array<{
+                'name': string;
+                /** --- 如 jpg --- */
+                'accept': string[];
+            }>;
+            'props'?: {
+                /** --- 允许选择文件，默认 true --- */
+                'file'?: boolean;
+                /** --- 允许选择文件夹，默认 false --- */
+                'directory'?: boolean;
+                /** --- 允许多选，默认 false --- */
+                'multi'?: boolean;
+            };
+        } = {}): string[] | null {
+            if (!t || !form) {
+                return null;
+            }
+            if (!verifyToken(t)) {
+                return null;
+            }
+            options.filters ??= [];
+            options.props ??= {};
+            options.props.file ??= true;
+            options.props.directory ??= false;
+            options.props.multi ??= false;
+            const paths = electron.dialog.showOpenDialogSync(form, {
+                'defaultPath': options.path ? tool.formatPath(options.path) : undefined,
+                'filters': options.filters.map((item) => {
+                    return {
+                        'name': item.name,
+                        'extensions': item.accept,
+                    };
+                }),
+                'properties': [
+                    options.props.file ? 'openFile' : '',
+                    options.props.directory ? 'openDirectory' : '',
+                    options.props.multi ? 'multiSelections' : '',
+                ].filter(item => item) as any,
+            });
+            if (!paths) {
+                return null;
+            }
+            return paths.map(item => tool.parsePath(item));
+        }
+    },
+
+    'cg-form-save': {
+        'once': false,
+        handler: function(t: string, options: {
+            /** --- 默认路径 --- */
+            'path'?: string;
+            /** --- 筛选的文件类型 --- */
+            'filters'?: Array<{
+                'name': string;
+                /** --- 如 jpg --- */
+                'accept': string[];
+            }>;
+        } = {}): string | null {
+            if (!t || !form) {
+                return null;
+            }
+            if (!verifyToken(t)) {
+                return null;
+            }
+            options.filters ??= [];
+            const path = electron.dialog.showSaveDialogSync(form, {
+                'defaultPath': options.path ? tool.formatPath(options.path) : undefined,
+                'filters': options.filters.map((item) => {
+                    return {
+                        'name': item.name,
+                        'extensions': item.accept,
+                    };
+                }),
+            });
+            if (!path) {
+                return null;
+            }
+            return tool.parsePath(path);
         }
     },
 
@@ -504,25 +593,16 @@ function createForm(p: string): void {
         }
         form.show();
     });
-    if (p.startsWith('https://') || p.startsWith('http://')) {
-        // --- 加载网页 ---
-        form.loadURL(p).catch(function(e): void {
-            throw e;
-        });
+    const lio = p.indexOf('?');
+    const search = lio === -1 ? '' : p.slice(lio + 1);
+    if (lio !== -1) {
+        p = p.slice(0, lio);
     }
-    else {
-        // --- 加载本地文件 ---
-        const lio = p.indexOf('?');
-        const search = lio === -1 ? '' : p.slice(lio + 1);
-        if (lio !== -1) {
-            p = p.slice(0, lio);
-        }
-        form.loadFile(p, {
-            'search': search
-        }).catch(function(e): void {
-            throw e;
-        });
-    }
+    form.loadFile(p, {
+        'search': search
+    }).catch(function(e): void {
+        throw e;
+    });
     form.on('close', function() {
         form = undefined;
     });
