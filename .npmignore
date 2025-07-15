@@ -13,3 +13,4 @@ node_modules/
 tsconfig.json
 
 /dist/test/
+/types/loader.d.ts
