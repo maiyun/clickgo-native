@@ -3,6 +3,7 @@
 .vs/
 node_modules/
 .DS_Store
+.npmrc
 package-lock.json
 *.d.ts
 !/types/*.d.ts
