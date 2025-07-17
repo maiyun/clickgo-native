@@ -4,7 +4,6 @@
 
 [![npm version](https://img.shields.io/npm/v/clickgo-native.svg?colorB=brightgreen)](https://www.npmjs.com/package/clickgo-native "Stable Version")
 [![npm version](https://img.shields.io/npm/v/clickgo-native/dev.svg)](https://www.npmjs.com/package/clickgo-native "Development Version")
-[![npm version](https://img.shields.io/npm/v/clickgo-native/beta.svg)](https://www.npmjs.com/package/clickgo-native "Beta Version")
 [![License](https://img.shields.io/github/license/maiyun/clickgo-native.svg)](https://github.com/maiyun/clickgo-native/blob/master/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/maiyun/clickgo-native.svg)](https://github.com/maiyun/clickgo-native/issues)
 [![GitHub Releases](https://img.shields.io/github/release/maiyun/clickgo-native.svg)](https://github.com/maiyun/clickgo-native/releases "Stable Release")
