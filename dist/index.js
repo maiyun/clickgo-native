@@ -96,7 +96,7 @@ const methods = {
     'cg-set-state': {
         'once': false,
         handler: function (t, state) {
-            if (!hasFrame || !form || !state) {
+            if (!form || !state) {
                 return;
             }
             if (!verifyToken(t)) {
@@ -554,16 +554,23 @@ function createForm(p) {
         }
         form.show();
     });
-    const lio = p.indexOf('?');
-    const search = lio === -1 ? '' : p.slice(lio + 1);
-    if (lio !== -1) {
-        p = p.slice(0, lio);
+    if (p.startsWith('https://') || p.startsWith('http://')) {
+        form.loadURL(p).catch(function (e) {
+            throw e;
+        });
     }
-    form.loadFile(p, {
-        'search': search
-    }).catch(function (e) {
-        throw e;
-    });
+    else {
+        const lio = p.indexOf('?');
+        const search = lio === -1 ? '' : p.slice(lio + 1);
+        if (lio !== -1) {
+            p = p.slice(0, lio);
+        }
+        form.loadFile(p, {
+            'search': search
+        }).catch(function (e) {
+            throw e;
+        });
+    }
     form.on('close', function () {
         form = undefined;
     });
