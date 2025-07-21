@@ -438,6 +438,9 @@ class AbstractBoot {
             }
         }
         createForm(path);
+        if (form && opt.dev) {
+            form.webContents.openDevTools();
+        }
         electron.app.on('window-all-closed', function () {
             if (isNoFormQuit) {
                 electron.app.quit();
@@ -448,6 +451,9 @@ class AbstractBoot {
                 return;
             }
             createForm(path);
+            if (form && opt.dev) {
+                form.webContents.openDevTools();
+            }
             methods['cg-init'] = {
                 'once': true,
                 handler: function (t) {
