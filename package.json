@@ -17,7 +17,7 @@
     "@litert/eslint-plugin-rules": "^0.3.1",
     "@litert/loader": "^3.5.9",
     "@types/node": "^24.0.14",
-    "clickgo": "^3.16.20",
+    "clickgo": "^3.16.21",
     "electron": "^37.2.2",
     "jszip": "^3.10.1",
     "typescript": "^5.8.3"

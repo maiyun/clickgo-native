@@ -536,7 +536,7 @@ function createForm(p) {
         'webPreferences': {
             'nodeIntegration': false,
             'contextIsolation': true,
-            'preload': path.join(__dirname, '/pre.js')
+            'preload': path.join(__dirname, '/pre.js'),
         },
         'width': hasFrame ? 800 : 500,
         'height': hasFrame ? 700 : 300,
