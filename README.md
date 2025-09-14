@@ -1,13 +1,20 @@
 # ClickGo Native
 
-<p align="center"><img src="dist/icon.png" width="100" height="100" alt="ClickGo Native"></p>
-
-[![npm version](https://img.shields.io/npm/v/clickgo-native.svg?colorB=brightgreen)](https://www.npmjs.com/package/clickgo-native "Stable Version")
-[![npm version](https://img.shields.io/npm/v/clickgo-native/dev.svg)](https://www.npmjs.com/package/clickgo-native "Development Version")
-[![License](https://img.shields.io/github/license/maiyun/clickgo-native.svg)](https://github.com/maiyun/clickgo-native/blob/master/LICENSE)
-[![GitHub issues](https://img.shields.io/github/issues/maiyun/clickgo-native.svg)](https://github.com/maiyun/clickgo-native/issues)
-[![GitHub Releases](https://img.shields.io/github/release/maiyun/clickgo-native.svg)](https://github.com/maiyun/clickgo-native/releases "Stable Release")
-[![GitHub Pre-Releases](https://img.shields.io/github/release/maiyun/clickgo-native/all.svg)](https://github.com/maiyun/clickgo-native/releases "Pre-Release")
+<p align="center"><img src="./dist/icon.png" width="100" height="100" alt="ClickGo Native"></p>
+<p align="center">
+    <a href="https://github.com/maiyun/clickgo-native/blob/master/LICENSE">
+        <img alt="License" src="https://img.shields.io/github/license/maiyun/clickgo-native?color=blue" />
+    </a>
+    <a href="https://www.npmjs.com/package/clickgo-native">
+        <img alt="NPM stable version" src="https://img.shields.io/npm/v/clickgo-native?color=brightgreen&logo=npm" />
+    </a>
+    <a href="https://github.com/maiyun/clickgo-native/releases">
+        <img alt="GitHub releases" src="https://img.shields.io/github/v/release/maiyun/clickgo-native?color=brightgreen&logo=github" />
+    </a>
+    <a href="https://github.com/maiyun/clickgo-native/issues">
+        <img alt="GitHub issues" src="https://img.shields.io/github/issues/maiyun/clickgo-native?color=blue&logo=github" />
+    </a>
+</p>
 
 The software developed with ClickGo will run in Windows, Mac OS, Linux.
 
@@ -17,12 +24,6 @@ You can install directly using NPM:
 
 ```sh
 $ npm i clickgo-native --save
-```
-
-Or install the developing (unstable) version for newest features:
-
-```sh
-$ npm i clickgo-native@dev --save
 ```
 
 **Node**
@@ -40,10 +41,6 @@ native.launcher(new Boot());
 ## Demo
 
 Clone and `npm run native`.
-
-## Changelog
-
-[Changelog](doc/CHANGELOG.md)
 
 ## License
 

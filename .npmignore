@@ -3,6 +3,7 @@
 .vs/
 .git/
 node_modules/
+eslint.config.cjs
 .gitignore
 .npmrc
 .npmignore
@@ -11,6 +12,6 @@ node_modules/
 *.ts
 !*.d.ts
 tsconfig.json
+package-lock.json
 
 /dist/test/
-/types/loader.d.ts
