@@ -463,10 +463,8 @@ export class AbstractBoot {
  * @param p 要加载的相对路径，如 ./index.html
  */
 export function path(importUrl, p) {
-    let url = importUrl.replace('file:///', '');
-    const lio = url.lastIndexOf('/');
-    url = url.slice(0, lio + 1);
-    return nodePath.join(url, p);
+    const url = importUrl.replace('file:///', '');
+    return nodePath.join(url.slice(0, url.lastIndexOf('/') + 1), p);
 }
 export function showMainForm(path, opt = {}) {
     if (form) {
@@ -537,7 +535,8 @@ export function verifyToken(t) {
  * @param p 窗体网页路径
  */
 function createForm(p, opt = {}) {
-    let pre = new URL('./pre.js', import.meta.url).pathname.replace(/^\/(\w:)/, '$1');
+    const url = import.meta.url.replace('file:///', '');
+    let pre = nodePath.join(url.slice(0, url.lastIndexOf('/') + 1), './pre.js');
     const op = {
         'webPreferences': {
             'nodeIntegration': false,
