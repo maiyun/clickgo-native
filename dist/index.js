@@ -1,4 +1,5 @@
 import * as electron from 'electron';
+import * as nodePath from 'path';
 import * as lFs from './lib/fs.js';
 import * as lTool from './lib/tool.js';
 // npm publish --tag dev --access public
@@ -455,6 +456,17 @@ export class AbstractBoot {
             'buttons': options.buttons,
         });
     }
+}
+/**
+ * --- 加载本地路径需要使用本函数加载 ---
+ * @param importUrl 传入 import.meta.url
+ * @param p 要加载的相对路径，如 ./index.html
+ */
+export function path(importUrl, p) {
+    let url = importUrl.replace('file:///', '');
+    const lio = url.lastIndexOf('/');
+    url = url.slice(0, lio + 1);
+    return nodePath.join(url, p);
 }
 export function showMainForm(path, opt = {}) {
     if (form) {
