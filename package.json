@@ -1,6 +1,6 @@
 {
   "name": "clickgo-native",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "The software developed with ClickGo will run in Windows, Mac OS, Linux.",
   "type": "module",
   "keywords": [
@@ -12,6 +12,8 @@
   "license": "Apache-2.0",
   "types": "./dist/index.d.ts",
   "scripts": {
+    "build": "tsc && clickgo --app ./dist/test/app",
+    "check": "tsc --noEmit --pretty false && eslint \"dist/**/*.ts\" --format stylish",
     "native": "electron ./dist/test",
     "sass": "sass --watch dist/:dist/ --style compressed --no-source-map"
   },
@@ -20,7 +22,6 @@
     "@types/node": "^26.5.1",
     "clickgo": "^6.1.2",
     "electron": "^44.3.0",
-    "jszip": "^3.10.2",
     "typescript": "^6.0.3"
   }
 }

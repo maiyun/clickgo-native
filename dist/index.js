@@ -537,6 +537,8 @@ export function verifyToken(t) {
 function createForm(p, opt = {}) {
     const url = decodeURIComponent(import.meta.url).replace('file://', '').replace(/^\/(\w:)/, '$1');
     let pre = nodePath.join(url.slice(0, url.lastIndexOf('/') + 1), './pre.js');
+    /** --- Linux 新版 Electron 无框窗口需要透明背景，避免 CSD 外边距显示为黑框 --- */
+    const transparent = opt.transparent ?? ((platform === 'linux') && !hasFrame);
     const op = {
         'webPreferences': {
             'nodeIntegration': false,
@@ -546,12 +548,15 @@ function createForm(p, opt = {}) {
         'width': opt.width ?? (hasFrame ? 800 : 600),
         'height': opt.height ?? (hasFrame ? 700 : 350),
         'frame': hasFrame,
+        'thickFrame': platform === 'win32' ? hasFrame : undefined,
+        'roundedCorners': platform === 'linux' ? hasFrame : undefined,
+        'hasShadow': platform === 'linux' ? hasFrame : undefined,
         'resizable': false,
         'show': false,
         'center': true,
         'maximizable': opt.max ?? true,
-        'backgroundColor': opt.background ?? 'rgba(0, 0, 0, 1)',
-        'transparent': opt.transparent,
+        'backgroundColor': transparent ? 'rgba(0, 0, 0, 0)' : (opt.background ?? 'rgba(0, 0, 0, 1)'),
+        'transparent': transparent,
     };
     form = new electron.BrowserWindow(op);
     form.webContents.userAgent = 'electron/' + electron.app.getVersion() + ' ' + platform + '/' + process.arch + ' frame/' + (hasFrame ? '1' : '0') + ' chrome/' + process.versions.chrome;
@@ -560,7 +565,7 @@ function createForm(p, opt = {}) {
             return;
         }
         if (opt.background) {
-            form.setBackgroundColor(opt.transparent ? 'rgba(0, 0, 0, 0)' : 'rgba(0, 0, 0, 1)');
+            form.setBackgroundColor(transparent ? 'rgba(0, 0, 0, 0)' : 'rgba(0, 0, 0, 1)');
         }
         form.show();
         if (opt.stateMax) {
