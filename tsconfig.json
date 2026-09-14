@@ -5,16 +5,15 @@
         "preserveConstEnums": true, // 保留 const 和 enum 声明
         // "outDir": "dist/",
         "sourceMap": false,
-        "target": "ES2021",
+        "target": "ES2022",
         "strict": true,             // 严格模式
         "declaration": true,        // d.ts
         "declarationMap": false,    // d.ts 的 map
         "newLine": "LF",
-        "baseUrl": "./",
         "paths": {
             "~/*": ["./*"]
         },
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "skipLibCheck": true

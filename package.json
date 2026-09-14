@@ -12,14 +12,15 @@
   "license": "Apache-2.0",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "native": "electron ./dist/test"
+    "native": "electron ./dist/test",
+    "sass": "sass --watch dist/:dist/ --style compressed --no-source-map"
   },
   "devDependencies": {
     "@litert/eslint-plugin-rules": "^0.3.1",
-    "@types/node": "^24.3.3",
-    "clickgo": "^4.0.3",
-    "electron": "^37.4.0",
-    "jszip": "^3.10.1",
-    "typescript": "^5.9.2"
+    "@types/node": "^26.5.1",
+    "clickgo": "^6.1.2",
+    "electron": "^44.3.0",
+    "jszip": "^3.10.2",
+    "typescript": "^6.0.3"
   }
 }
