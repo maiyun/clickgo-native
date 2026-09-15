@@ -6,6 +6,7 @@ class Boot extends clickgo.AbstractBoot {
         const block = document.getElementById('block')!;
         const text = document.getElementById('text')!;
         let first = true;
+        /** --- 加载应用 --- */
         const taskId = await clickgo.task.run(this._sysId, 'app.cga', {
             'notify': false,
             perProgress: (per) => {
