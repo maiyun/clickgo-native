@@ -42,6 +42,8 @@ native.launcher(new Boot());
 
 ## Build a ClickGo Application as a Native Package
 
+The application project does not need to install `electron` directly when using ClickGo Compiler to run and package it. The compiler supplies the Electron runtime. Native main-process code can use `native.getAppVersion()` to read the application's `package.json` version and `native.isPackaged()` to distinguish a packaged application from development runs. These APIs do not expose Electron to the HTML page.
+
 Building a desktop application consists of two steps: compile the ClickGo application into a `.cga` file, then package the Native project with Electron.
 
 Install the compiler globally first:

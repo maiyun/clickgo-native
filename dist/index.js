@@ -511,6 +511,20 @@ function resetMainSession() {
         },
     };
 }
+/**
+ * --- 获取当前桌面应用的版本，来自应用 package.json ---
+ * @returns 应用版本
+ */
+export function getAppVersion() {
+    return electron.app.getVersion();
+}
+/**
+ * --- 判断当前应用是否为已打包运行 ---
+ * @returns 是否已打包
+ */
+export function isPackaged() {
+    return electron.app.isPackaged;
+}
 /** --- 用户调用运行 boot 类 --- */
 export function launcher(boot) {
     (async function () {
