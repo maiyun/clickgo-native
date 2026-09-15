@@ -26,6 +26,7 @@ class Boot extends clickgo.AbstractBoot {
             return;
         }
         document.getElementById('main')?.remove();
+        //*/
     }
 
     public onError(taskId: string, formId: string, error: Error, info: string): void {

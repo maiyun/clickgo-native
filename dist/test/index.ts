@@ -7,7 +7,6 @@ class Boot extends native.AbstractBoot {
             'frame': false,
             'background': 'hsl(21, 100%, 54%)',
         });
-        // this.run('../../../clickgo/dist/test/desktop/index.html');
     }
 
 }
