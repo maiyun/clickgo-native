@@ -129,6 +129,14 @@ $ clickgo --native --platform linux
 $ clickgo --native --platform mac
 ```
 
+When building the Linux `rpm` target, ensure that `rpmbuild` is installed on the build host. On Ubuntu or Debian, install it before packaging:
+
+```sh
+$ sudo apt install rpm
+```
+
+On other Linux distributions, use the system package manager to install the package that provides `rpmbuild`. This tool is required for RPM packaging, not for the AppImage or DEB targets.
+
 When downloading Electron in mainland China, enable the mirror:
 
 ```sh
