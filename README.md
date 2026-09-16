@@ -34,11 +34,16 @@ class Boot extends native.AbstractBoot {
     public main(): void {
         this.run(native.path(import.meta.url, './index.html'), {
             'frame': false,
+            'icon': native.path(import.meta.url, './logo.png'),
         });
     }
 }
 native.launcher(new Boot());
 ```
+
+`icon` supplies the native window icon on Windows and Linux. Include this file in the application's packaged files; `build.linux.icon` configures the installed application-list icon separately. When packaging through ClickGo Compiler, set `build.linux.icon` to a single square PNG of at least 256×256 pixels (512×512 or 1024×1024 is recommended). The compiler automatically generates standard Linux icon sizes in a temporary directory and cleans them up after packaging; the source image and configuration are not changed. Existing multi-size PNG directories remain supported. Also set the application's `desktopName` and `build.linux.syncDesktopName: true` to associate the running window with its desktop entry.
+
+For frameless ClickGo applications, the first Form synchronizes its `minWidth` and `minHeight` to the native window, including subsequent changes. System close requests (such as Alt+F4) are forwarded to that Form's `close` event. Call `event.preventDefault()` synchronously before showing an asynchronous ClickGo confirmation, then close the Form after confirmation. Explicit `native.close()` and `native.quit()` are final, authorized close actions and do not repeat the confirmation. These integrations require the corresponding updated ClickGo runtime as well as ClickGo Native.
 
 ## Build a ClickGo Application as a Native Package
 
