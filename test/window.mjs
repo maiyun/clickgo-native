@@ -1,4 +1,5 @@
 // Run after TypeScript compilation: node --experimental-vm-modules test/window.mjs
+// Pass a compiled Native entry path to check another runtime copy with the same regressions.
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
 import { readFile } from 'node:fs/promises';
@@ -22,6 +23,8 @@ class BrowserWindow extends EventEmitter {
         this.options = options;
         this.size = [options.width, options.height];
         this.minimum = [0, 0];
+        this.savedMinimum = [0, 0];
+        this._resizable = options.resizable;
         this.destroyed = false;
         this.webContents = new EventEmitter();
         this.webContents.mainFrame = { url: url.pathToFileURL('/app/index.html').href };
@@ -31,7 +34,16 @@ class BrowserWindow extends EventEmitter {
     }
     async loadFile() { this.webContents.emit('did-navigate'); }
     isDestroyed() { return this.destroyed; }
-    setMinimumSize(w, h) { this.minimum = [w, h]; }
+    get resizable() { return this._resizable; }
+    set resizable(value) {
+        // Electron restores the pre-lock constraints when resizing is enabled on Linux.
+        if (value && !this._resizable) { this.minimum = [...this.savedMinimum]; }
+        this._resizable = value;
+    }
+    setMinimumSize(w, h) {
+        this.minimum = [w, h];
+        if (this._resizable) { this.savedMinimum = [...this.minimum]; }
+    }
     getSize() { return this.size; }
     setSize(w, h) { this.size = [w, h]; }
     center() {}
@@ -54,8 +66,9 @@ const dependencies = {
     './lib/fs.js': synthetic({}),
     './lib/tool.js': synthetic({}),
 };
-const mod = new SourceTextModule(await readFile(new URL('../dist/index.js', import.meta.url), 'utf8'), {
-    initializeImportMeta(meta) { meta.url = new URL('../dist/index.js', import.meta.url).href; },
+const entry = process.argv[2] ? url.pathToFileURL(path.resolve(process.argv[2])) : new URL('../dist/index.js', import.meta.url);
+const mod = new SourceTextModule(await readFile(entry, 'utf8'), {
+    initializeImportMeta(meta) { meta.url = entry.href; },
 });
 await mod.link(name => dependencies[name]);
 await mod.evaluate();
@@ -69,17 +82,30 @@ const run = () => {
     return (...params) => ipc(event, ...params);
 };
 let invoke = run();
+// Even without explicit Form minimums, the immediate watchers send the default 200x100.
+invoke('cg-set-min-size', 'secret', 200, 100);
+invoke('cg-set-size', 'secret', 50, 50);
+assert.deepEqual(window.minimum, [200, 100]);
+assert.deepEqual(window.size, [200, 100]);
+invoke('cg-close', 'secret');
+invoke = run();
 assert.equal(window.options.icon, '/app/icon.png');
 for (const args of [['bad', 360, 240], ['secret', -1, 240], ['secret', 1.5, 240], ['secret', NaN, 240]]) {
     invoke('cg-set-min-size', ...args);
     assert.deepEqual(window.minimum, [0, 0]);
 }
-invoke('cg-set-size', 'secret', 200, 100);
+// Form's immediate watchers send minimum size before form.create unlocks the window.
 invoke('cg-set-min-size', 'secret', 360, 240);
+assert.equal(window.resizable, false);
+assert.deepEqual(window.size, [600, 400]);
+invoke('cg-set-size', 'secret', 200, 100);
 assert.deepEqual(window.minimum, [360, 240]);
 assert.deepEqual(window.size, [360, 240]);
 invoke('cg-set-min-size', 'secret', 420, 300);
 assert.deepEqual(window.minimum, [420, 300]);
+invoke('cg-set-size', 'secret', 100, 100);
+assert.deepEqual(window.minimum, [420, 300]);
+assert.deepEqual(window.size, [420, 300]);
 invoke('cg-set-min-size', 'secret', 0, 0);
 assert.deepEqual(window.minimum, [0, 0]);
 
@@ -95,12 +121,23 @@ assert.equal(window.destroyed, true);
 assert.equal(queries, 1);
 
 invoke = run();
+assert.deepEqual(window.minimum, [0, 0]);
+invoke('cg-set-size', 'secret', 500, 400);
+assert.deepEqual(window.minimum, [0, 0]);
+invoke('cg-set-min-size', 'secret', 360, 240);
+assert.deepEqual(window.minimum, [360, 240]);
 handled = false;
 window.close();
 await new Promise(r => setImmediate(r));
 assert.equal(window.destroyed, true);
 
 invoke = run();
+invoke('cg-set-min-size', 'secret', 360, 240);
+invoke('cg-set-min-size', 'secret', 420, 300);
+invoke('cg-set-min-size', 'bad', 0, 0);
+invoke('cg-set-size', 'secret', 200, 100);
+assert.deepEqual(window.minimum, [420, 300]);
+assert.deepEqual(window.size, [420, 300]);
 handled = true;
 invoke('cg-quit', 'secret');
 assert.equal(quits, 1);
