@@ -31,6 +31,10 @@ $ npm i clickgo-native --save
 ```typescript
 import * as native from 'clickgo-native';
 class Boot extends native.AbstractBoot {
+    public onOpenFiles(paths: string[]): void {
+        console.log(paths);
+    }
+
     public main(): void {
         this.run(native.path(import.meta.url, './index.html'), {
             'frame': false,
@@ -38,8 +42,13 @@ class Boot extends native.AbstractBoot {
         });
     }
 }
-native.launcher(new Boot());
+native.launcher(new Boot(), {
+    'openFiles': true,
+    'singleInstance': true,
+});
 ```
+
+`launcher()` configures process-level behavior before Electron becomes ready. `openFiles` forwards files received from associations, command-line launches, and window drops to `onOpenFiles()`. `singleInstance` prevents duplicate application processes and activates the existing window when another instance starts. These options are independent; use either one without enabling the other when appropriate.
 
 `icon` supplies the native window icon on Windows and Linux. Include this file in the application's packaged files; `build.linux.icon` configures the installed application-list icon separately. When packaging through ClickGo Compiler, set `build.linux.icon` to a single square PNG of at least 256×256 pixels (512×512 or 1024×1024 is recommended). The compiler automatically generates standard Linux icon sizes in a temporary directory and cleans them up after packaging; the source image and configuration are not changed. Existing multi-size PNG directories remain supported. Also set the application's `desktopName` and `build.linux.syncDesktopName: true` to associate the running window with its desktop entry.
 

@@ -9,12 +9,22 @@ import { SourceTextModule, SyntheticModule } from 'node:vm';
 
 let window;
 let ipc;
+let dropFiles;
+let fileOpenEnabled;
 let handled = true;
 let queries = 0;
 let quits = 0;
+let locks = 0;
+let activations = 0;
+const openFilePaths = ['/tmp/first.txt', '/tmp/second.txt', '/tmp/third.txt', '/tmp/fourth.txt'];
+const entryArg = process.argv[2];
+const originalArgv = process.argv;
+process.argv = ['/electron', '/app/index.js', openFilePaths[0]];
 const app = new EventEmitter();
 app.getAppPath = () => '/app';
 app.getVersion = () => '1.0.0';
+app.whenReady = async () => {};
+app.requestSingleInstanceLock = () => { ++locks; return true; };
 app.quit = () => { ++quits; window.close(); };
 class BrowserWindow extends EventEmitter {
     constructor(options) {
@@ -47,6 +57,11 @@ class BrowserWindow extends EventEmitter {
     getSize() { return this.size; }
     setSize(w, h) { this.size = [w, h]; }
     center() {}
+    isMinimized() { return false; }
+    restore() {}
+    setAlwaysOnTop() {}
+    show() {}
+    focus() { ++activations; }
     close() {
         let prevented = false;
         this.emit('close', { preventDefault() { prevented = true; } });
@@ -60,13 +75,25 @@ function synthetic(exports) {
 }
 const dependencies = {
     'electron': synthetic({ app, BrowserWindow, Menu: { setApplicationMenu() {} },
-        ipcMain: { handle(name, callback) { ipc = callback; } } }),
+        ipcMain: {
+            handle(name, callback) { ipc = callback; },
+            on(name, callback) {
+                if (name === 'drop-files') { dropFiles = callback; }
+                if (name === 'file-open-enabled') { fileOpenEnabled = callback; }
+            },
+        } }),
+    'node:fs': synthetic({
+        statSync(value) {
+            if (!openFilePaths.includes(value)) { throw new Error('File not found'); }
+            return { isFile: () => true };
+        }
+    }),
     'path': synthetic(path),
     'node:url': synthetic(url),
-    './lib/fs.js': synthetic({}),
-    './lib/tool.js': synthetic({}),
+    './lib/fs.js': synthetic({ refreshDrives: async () => {} }),
+    './lib/tool.js': synthetic({ parsePath: value => value }),
 };
-const entry = process.argv[2] ? url.pathToFileURL(path.resolve(process.argv[2])) : new URL('../dist/index.js', import.meta.url);
+const entry = entryArg ? url.pathToFileURL(path.resolve(entryArg)) : new URL('../dist/index.js', import.meta.url);
 const mod = new SourceTextModule(await readFile(entry, 'utf8'), {
     initializeImportMeta(meta) { meta.url = entry.href; },
 });
@@ -82,6 +109,9 @@ const run = () => {
     return (...params) => ipc(event, ...params);
 };
 let invoke = run();
+const disabledDrop = { sender: window.webContents };
+fileOpenEnabled(disabledDrop);
+assert.equal(disabledDrop.returnValue, false);
 // Even without explicit Form minimums, the immediate watchers send the default 200x100.
 invoke('cg-set-min-size', 'secret', 200, 100);
 invoke('cg-set-size', 'secret', 50, 50);
@@ -142,4 +172,36 @@ handled = true;
 invoke('cg-quit', 'secret');
 assert.equal(quits, 1);
 assert.equal(window.destroyed, true);
-console.log('Native icon, minimum-size and close-bridge regression checks passed.');
+
+class SingleBoot extends mod.namespace.AbstractBoot { main() {} }
+mod.namespace.launcher(new SingleBoot(), { singleInstance: true });
+await new Promise(r => setImmediate(r));
+assert.equal(locks, 1);
+app.removeAllListeners('second-instance');
+
+const opened = [];
+class FileBoot extends mod.namespace.AbstractBoot {
+    onOpenFiles(paths) { opened.push(paths); }
+    main() { this.run('/app/index.html', { frame: false }); }
+}
+mod.namespace.launcher(new FileBoot(), { openFiles: true, singleInstance: true });
+await new Promise(r => setImmediate(r));
+assert.equal(locks, 2);
+assert.deepEqual(opened, [[openFilePaths[0]]]);
+const enabledDrop = { sender: window.webContents };
+fileOpenEnabled(enabledDrop);
+assert.equal(enabledDrop.returnValue, true);
+let prevented = false;
+app.emit('open-file', { preventDefault() { prevented = true; } }, openFilePaths[1]);
+assert.equal(prevented, true);
+app.emit('second-instance', {}, ['/electron', openFilePaths[2]], '/');
+dropFiles({ sender: window.webContents }, [openFilePaths[3]]);
+assert.equal(activations, 2);
+assert.deepEqual(opened, [
+    [openFilePaths[0]],
+    [openFilePaths[1]],
+    [openFilePaths[2]],
+    [openFilePaths[3]],
+]);
+process.argv = originalArgv;
+console.log('Native icon, minimum-size, close-bridge and file-open regression checks passed.');
