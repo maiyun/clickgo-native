@@ -8,7 +8,7 @@
 - `cg-command-entry` 只返回软件进程入口及当前 MCP 能力状态；由 ClickGo 的 `command.getAgentInfo()` / `getAgentGuide()` 统一生成说明，Demo 直接展示结果。默认及网页入口均不导出凭据，应用显式导出仍需 root；默认说明简短且不嵌入临时 App/实例 ID；启动模式由 commandAutoStart 对应 existing/auto。跨仓库更新必须同时安装包含这些 API 的 ClickGo 运行时与类型。
 - Native Demo 位于 `dist/test/`，沿用英文展示。`mcp-client.ts` 是外部协议调用示例，App 只需注册公开命令。
 - `npm run build` 编译 TypeScript 并打包 Demo，`npm run check` 检查类型与 lint，`npm run test:mcp` 使用官方客户端连接真实 HTTP 服务，`npm run test:window` 检查 Native 窗口集成。桌面验收另外启动 Electron，不能用这些静态或协议测试代替。
-- Demo 使用安装的 ClickGo 6.10.0 或更新版本；跨仓库开发时先编译、打包 ClickGo，再安装本地 npm 包。主进程包与网页运行时必须同时更新才能完成命令转发。
+- Demo 使用安装的 ClickGo 运行时；跨仓库开发时先编译、打包 ClickGo，再安装本地 npm 包。主进程包与网页运行时必须同时更新才能完成命令转发。
 
 ## 与 ClickGo 测试副本同步
 

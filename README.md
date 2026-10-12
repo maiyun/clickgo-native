@@ -179,7 +179,7 @@ $ npm run native
 
 ## Local MCP
 
-ClickGo Native exposes App commands through Streamable HTTP, stdio MCP and CLI, sharing the same execution as buttons and menus. Use ClickGo 6.10.0 or later.
+ClickGo Native exposes App commands through Streamable HTTP, stdio MCP and CLI, sharing the same execution as buttons and menus.
 
 First register the App's commands with `clickgo.command.register()` and `exposed: true`; UI actions use `clickgo.command.execute()`. See the [complete command example](doc/mcp.md#command-registration).
 

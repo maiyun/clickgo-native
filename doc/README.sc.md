@@ -179,7 +179,7 @@ $ npm run native
 
 ## 本地 MCP
 
-ClickGo Native 通过 Streamable HTTP、stdio MCP 和 CLI 开放 App 命令，与按钮和菜单共用执行逻辑。需要 ClickGo 6.10.0 或更高版本。
+ClickGo Native 通过 Streamable HTTP、stdio MCP 和 CLI 开放 App 命令，与按钮和菜单共用执行逻辑。
 
 先用 `clickgo.command.register()` 注册 App 命令并设置 `exposed: true`，界面操作调用 `clickgo.command.execute()`。完整示例见 [命令注册](mcp.sc.md#命令注册)。
 
