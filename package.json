@@ -1,6 +1,6 @@
 {
   "name": "clickgo-native",
-  "version": "2.0.7",
+  "version": "2.1.0",
   "description": "The software developed with ClickGo will run in Windows, Mac OS, Linux.",
   "type": "module",
   "keywords": [
@@ -14,14 +14,33 @@
   "scripts": {
     "build": "tsc && clickgo --app ./dist/test/app",
     "check": "tsc --noEmit --pretty false && eslint \"dist/**/*.ts\" --format stylish",
+    "test:mcp": "node test/version.mjs && node test/mcp.mjs",
+    "test:window": "node --experimental-vm-modules test/window.mjs",
     "native": "electron ./dist/test",
-    "sass": "sass --watch dist/:dist/ --style compressed --no-source-map"
+    "sass": "sass --watch dist/:dist/ --style compressed --no-source-map",
+    "test:cli": "node test/cli.mjs && node test/startup.mjs"
   },
   "devDependencies": {
     "@litert/eslint-plugin-rules": "^0.3.1",
     "@types/node": "^26.5.1",
-    "clickgo": "^6.1.5",
+    "clickgo": "^6.10.0",
     "electron": "^44.3.0",
     "typescript": "^6.0.3"
-  }
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "^2.3.1",
+    "@modelcontextprotocol/node": "^2.1.1",
+    "@modelcontextprotocol/server": "^2.3.1"
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "dist/**/*.cga",
+    "dist/**/*.css",
+    "dist/**/*.html",
+    "dist/icon.png",
+    "doc/README.sc.md",
+    "doc/mcp.md",
+    "doc/mcp.sc.md"
+  ]
 }

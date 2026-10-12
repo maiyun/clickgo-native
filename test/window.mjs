@@ -1,10 +1,11 @@
-// Run after TypeScript compilation: node --experimental-vm-modules test/window.mjs
+// Run after TypeScript compilation: node --experimental-vm-modules test/native-window.mjs
 // Pass a compiled Native entry path to check another runtime copy with the same regressions.
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as url from 'node:url';
+import * as crypto from 'node:crypto';
 import { SourceTextModule, SyntheticModule } from 'node:vm';
 
 let window;
@@ -15,7 +16,12 @@ let handled = true;
 let queries = 0;
 let quits = 0;
 let locks = 0;
+const exits = [];
+const commands = [];
+let commandRun = async () => {};
 let activations = 0;
+let startMcp = async () => false;
+let sandboxDisabled = false;
 const openFilePaths = ['/tmp/first.txt', '/tmp/second.txt', '/tmp/third.txt', '/tmp/fourth.txt'];
 const entryArg = process.argv[2];
 const originalArgv = process.argv;
@@ -23,6 +29,11 @@ process.argv = ['/electron', '/app/index.js', openFilePaths[0]];
 const app = new EventEmitter();
 app.getAppPath = () => '/app';
 app.getVersion = () => '1.0.0';
+app.getPath = () => '/app/user-data';
+app.getName = () => 'Native test';
+app.exit = code => exits.push(code);
+app.disableHardwareAcceleration = () => {};
+app.commandLine = { appendSwitch() {}, hasSwitch: name => name === 'no-sandbox' && sandboxDisabled };
 app.whenReady = async () => {};
 app.requestSingleInstanceLock = () => { ++locks; return true; };
 app.quit = () => { ++quits; window.close(); };
@@ -90,8 +101,11 @@ const dependencies = {
     }),
     'path': synthetic(path),
     'node:url': synthetic(url),
+    'node:crypto': synthetic(crypto),
     './lib/fs.js': synthetic({ refreshDrives: async () => {} }),
     './lib/tool.js': synthetic({ parsePath: value => value }),
+    './lib/cli.js': synthetic({ run: (...args) => { commands.push(args); return commandRun(); } }),
+    './lib/mcp.js': synthetic({ start: (...args) => startMcp(...args) }),
 };
 const entry = entryArg ? url.pathToFileURL(path.resolve(entryArg)) : new URL('../dist/index.js', import.meta.url);
 const mod = new SourceTextModule(await readFile(entry, 'utf8'), {
@@ -109,6 +123,31 @@ const run = () => {
     return (...params) => ipc(event, ...params);
 };
 let invoke = run();
+// --- 接入入口不含凭据，仍只接受当前主文档会话；开发模式保留实际入口文件。 ---
+assert.equal(invoke('cg-command-entry', 'bad'), null);
+assert.equal(ipc({ sender: window.webContents, senderFrame: { url: window.webContents.mainFrame.url } },
+    'cg-command-entry', 'secret'), undefined);
+const developmentEntry = invoke('cg-command-entry', 'secret');
+assert.equal(developmentEntry.command, process.execPath);
+assert.deepEqual(developmentEntry.args, ['/app/index.js']);
+assert.equal(developmentEntry.startup, 'existing');
+assert.deepEqual(developmentEntry.mcp, { enabled: false, discovery: false });
+assert.equal(Object.hasOwn(developmentEntry, 'token'), false);
+process.argv[1] = '/app/index2.js';
+assert.deepEqual(mod.namespace.getCommandEntry().args, ['/app/index2.js']);
+process.argv = ['/electron', '--inspect=0', '--require', '/loader/register.js', '--remote-debugging-port=0', '/app/index2.js'];
+assert.deepEqual(mod.namespace.getCommandEntry().args, ['/app/index2.js']);
+process.argv = ['/electron', '--inspect=0', '--app=/app/index3.js'];
+assert.deepEqual(mod.namespace.getCommandEntry().args, ['/app/index3.js']);
+process.argv = ['/electron', '/app/index.js', openFilePaths[0]];
+app.isPackaged = true;
+assert.deepEqual(mod.namespace.getCommandEntry().args, []);
+sandboxDisabled = true;
+assert.deepEqual(mod.namespace.getCommandEntry().args, ['--no-sandbox']);
+sandboxDisabled = false;
+app.isPackaged = false;
+developmentEntry.args.push('mutated');
+assert.deepEqual(mod.namespace.getCommandEntry().args, ['/app/index.js']);
 const disabledDrop = { sender: window.webContents };
 fileOpenEnabled(disabledDrop);
 assert.equal(disabledDrop.returnValue, false);
@@ -203,5 +242,94 @@ assert.deepEqual(opened, [
     [openFilePaths[2]],
     [openFilePaths[3]],
 ]);
+// --- 软件自身命令先于 GUI 单实例和文件处理分流；stdio 保持到协议关闭 ---
+const previousWindow = window;
+const previousLocks = locks;
+let businessStarts = 0;
+class CommandBoot extends mod.namespace.AbstractBoot { main() { ++businessStarts; } }
+process.argv = ['/packaged/software', '--cli', 'apps'];
+mod.namespace.launcher(new CommandBoot(), { singleInstance: true, openFiles: true });
+await new Promise(resolve => setImmediate(resolve));
+assert.deepEqual(commands.at(-1)[0], ['apps']);
+assert.equal(typeof commands.at(-1)[1].applicationId, 'string');
+assert.equal(commands.at(-1)[1].startup, undefined);
+assert.equal(exits.at(-1), 0);
+assert.equal(window, previousWindow);
+assert.equal(locks, previousLocks);
+assert.equal(businessStarts, 0);
+process.argv = ['/packaged/software', '--no-sandbox', '--cli', 'instances'];
+mod.namespace.launcher(new CommandBoot(), { singleInstance: true, commandAutoStart: true });
+await new Promise(resolve => setImmediate(resolve));
+assert.deepEqual(commands.at(-1)[0], ['instances']);
+assert.equal(commands.at(-1)[1].startup.command, mod.namespace.getCommandEntry().command);
+assert.equal(mod.namespace.getCommandEntry().startup, 'auto');
+assert.equal(locks, previousLocks);
+assert.equal(businessStarts, 0);
+let finishStdio;
+commandRun = () => new Promise(resolve => { finishStdio = resolve; });
+process.argv = ['/packaged/software', '--mcp'];
+const beforeExit = exits.length;
+mod.namespace.launcher(new CommandBoot(), { singleInstance: true });
+await new Promise(resolve => setImmediate(resolve));
+assert.deepEqual(commands.at(-1)[0], ['mcp']);
+assert.equal(exits.length, beforeExit);
+let quitPrevented = false;
+app.emit('before-quit', { preventDefault() { quitPrevented = true; } });
+assert.equal(quitPrevented, true);
+assert.equal(commands.at(-1)[1].signal.aborted, true);
+finishStdio();
+await new Promise(resolve => setImmediate(resolve));
+assert.equal(exits.length, beforeExit + 1);
+assert.equal(businessStarts, 0);
+assert.equal(app.listenerCount('before-quit'), 0);
+commandRun = async () => {};
 process.argv = originalArgv;
 console.log('Native icon, minimum-size, close-bridge and file-open regression checks passed.');
+
+// --- 启动监听期间停止或关闭窗口，都不能留下稍后启用的服务。 ---
+invoke = run();
+let ready;
+let closed = false;
+const service = { info: { transport: 'streamable-http', url: 'http://localhost/mcp', token: 'test' },
+    close: async () => { closed = true; } };
+let callMcp;
+startMcp = async invoke => { callMcp = invoke; return service; };
+assert.deepEqual(await mod.namespace.startMcp(), service.info);
+assert.deepEqual(mod.namespace.getCommandEntry().mcp, { enabled: true, discovery: true });
+const scripts = [];
+window.webContents.executeJavaScript = async code => {
+    scripts.push(code);
+    const payload = JSON.parse(JSON.parse(code.match(/JSON.parse\((.*)\)\)$/)[1]));
+    assert.equal(Object.hasOwn(payload.args, '__proto__'), true);
+    assert.equal(Object.getPrototypeOf(payload.args), Object.prototype);
+    assert.equal(payload.name, 'quote";unexpected()');
+    return { ok: true, data: 'preserved JSON' };
+};
+assert.deepEqual(await callMcp({ method: 'execute', taskId: 'app', name: 'quote";unexpected()',
+    args: JSON.parse('{"__proto__":{"value":1}}') }, new AbortController().signal), { ok: true, data: 'preserved JSON' });
+assert.equal(scripts.length, 1);
+await mod.namespace.stopMcp();
+assert.equal(closed, true);
+assert.deepEqual(mod.namespace.getCommandEntry().mcp, { enabled: false, discovery: false });
+assert.deepEqual(await mod.namespace.startMcp({ discovery: false }), service.info);
+assert.deepEqual(mod.namespace.getCommandEntry().mcp, { enabled: true, discovery: false });
+await mod.namespace.stopMcp();
+closed = false;
+startMcp = () => new Promise(resolve => { ready = resolve; });
+const starting = mod.namespace.startMcp();
+assert.equal(await mod.namespace.startMcp(), false);
+const stopping = mod.namespace.stopMcp();
+ready(service);
+assert.equal(await starting, false);
+await stopping;
+assert.equal(closed, true);
+assert.equal(mod.namespace.getMcpInfo(), null);
+closed = false;
+const afterClose = mod.namespace.startMcp();
+invoke('cg-close', 'secret');
+ready(service);
+assert.equal(await afterClose, false);
+assert.equal(closed, true);
+assert.equal(mod.namespace.getMcpInfo(), null);
+assert.equal(await mod.namespace.startMcp(), false);
+console.log('Native MCP duplicate start, stop during startup and window-close cleanup checks passed.');

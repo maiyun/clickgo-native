@@ -16,6 +16,8 @@
     </a>
 </p>
 
+[简体中文](./doc/README.sc.md)
+
 The software developed with ClickGo will run in Windows, Mac OS, Linux.
 
 ## Installation
@@ -26,7 +28,9 @@ You can install directly using NPM:
 $ npm i clickgo-native --save
 ```
 
-**Node**
+This installation step is for application developers. End users install your packaged software; they do not need a separate Node.js installation or a global clickgo-native package.
+
+**Native main process**
 
 ```typescript
 import * as native from 'clickgo-native';
@@ -49,6 +53,8 @@ native.launcher(new Boot(), {
 ```
 
 `launcher()` configures process-level behavior before Electron becomes ready. `openFiles` forwards files received from associations, command-line launches, and window drops to `onOpenFiles()`. `singleInstance` prevents duplicate application processes and activates the existing window when another instance starts. These options are independent; use either one without enabling the other when appropriate.
+
+`launcher()` also provides the software's [CLI and stdio modes](#cli-and-stdio-mcp). Put business startup in `Boot.main()` and keep stdio stdout reserved for MCP.
 
 `icon` supplies the native window icon on Windows and Linux. Include this file in the application's packaged files; `build.linux.icon` configures the installed application-list icon separately. When packaging through ClickGo Compiler, set `build.linux.icon` to a single square PNG of at least 256×256 pixels (512×512 or 1024×1024 is recommended). The compiler automatically generates standard Linux icon sizes in a temporary directory and cleans them up after packaging; the source image and configuration are not changed. Existing multi-size PNG directories remain supported. Also set the application's `desktopName` and `build.linux.syncDesktopName: true` to associate the running window with its desktop entry.
 
@@ -96,7 +102,7 @@ The Native page must provide the ClickGo runtime and load the compiled browser e
 <script type="importmap">
 {
     "imports": {
-        "clickgo": "https://js.maiyun.net/npm/clickgo@6.1.2/dist/index.js"
+        "clickgo": "https://js.maiyun.net/npm/clickgo@6.10.0/dist/index.js"
     }
 }
 </script>
@@ -121,7 +127,8 @@ class Boot extends clickgo.AbstractBoot {
             'permissions': ['root'],
         });
         if (typeof taskId !== 'string') {
-            throw new Error(`Load application failed (${taskId}).`);
+            console.error(`Load application failed (${taskId}).`);
+            return;
         }
     }
 }
@@ -165,9 +172,92 @@ Clone, build the current ClickGo test application, and run it with Electron:
 
 ```sh
 $ npm i -g clickgo-compiler
+$ npm install
 $ npm run build
 $ npm run native
 ```
+
+## Local MCP
+
+ClickGo Native exposes App commands through Streamable HTTP, stdio MCP and CLI, sharing the same execution as buttons and menus. Use ClickGo 6.10.0 or later.
+
+First register the App's commands with `clickgo.command.register()` and `exposed: true`; UI actions use `clickgo.command.execute()`. See the [complete command example](doc/mcp.md#command-registration).
+
+### Enable the service
+
+Create the window and enable MCP in the Native main process:
+
+```typescript
+import * as native from 'clickgo-native';
+
+class Boot extends native.AbstractBoot {
+    public async main(): Promise<void> {
+        this.run(native.path(import.meta.url, './index.html'), { 'frame': false });
+        const info = await native.startMcp();
+        if (info === false) {
+            return;
+        }
+        // Provide info.url and info.token through the application's connection settings.
+    }
+}
+
+native.launcher(new Boot(), { 'commandAutoStart': true });
+```
+
+`startMcp()` chooses a loopback port and random token. The launcher option lets CLI/stdio open the GUI when needed; omit it to use only an already running GUI. Keep credentials private.
+
+### Connect over HTTP
+
+Use the current URL and token returned by `startMcp()` in the client's connection settings:
+
+```json
+{
+    "url": "<url-from-connection-settings>",
+    "headers": { "Authorization": "Bearer <token>" }
+}
+```
+
+MCP clients discover Apps with `clickgo_list_apps`, inspect the selected App with `clickgo_list_commands`, then call `clickgo_execute_command`. Copy the chosen App's `id` into `taskId`; rediscover it after restart. Only exposed, enabled commands can be executed.
+
+## CLI and stdio MCP
+
+These modes use the installed software's executable and default local discovery. End users need no additional Node.js or global npm package. Use the `.exe` on Windows, the binary inside `.app/Contents/MacOS/` on macOS, or the binary/AppImage on Linux.
+
+**stdio MCP** — for clients with a `mcpServers` configuration:
+
+```json
+{
+    "mcpServers": {
+        "my-software": {
+            "command": "<absolute-path-to-installed-software>",
+            "args": ["--mcp"]
+        }
+    }
+}
+```
+
+**CLI** — start with help and App discovery, using Linux as an example:
+
+```sh
+./MySoftware --cli --help
+./MySoftware --cli apps
+```
+
+### Generate an AI access guide
+
+A ClickGo App or Form can generate ready-to-share English instructions for its actual environment:
+
+```typescript
+const guide = await clickgo.command.getAgentGuide(this);
+if (guide === null || guide === false) {
+    return;
+}
+// Display or copy guide in the application's AI access screen.
+```
+
+The guide covers browser JS/WebMCP, Native stdio/CLI and how to obtain HTTP settings. It omits credentials and transient App IDs by default; `getAgentInfo(this)` provides the detailed snapshot.
+
+See the [MCP and CLI guide](doc/mcp.md) for configuration options, credential export, multiple instances, cancellation and development tests.
 
 ## License
 

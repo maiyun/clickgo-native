@@ -1,5 +1,23 @@
-<form width="400" height="500" title="ClickGo Native" @min="onMin">
-    <layout style="flex: 1;" align-v="center" align-h="center">
-        <button style="padding: 50px 80px;">Hello</button>
-    </layout>
+<form width="640" height="680" min-width="320" min-height="420" title="ClickGo Native" @min="onMin" padding="10" direction="v">
+    <!-- 普通按钮与外部 MCP 客户端使用同一组命令和数据 -->
+    <flow direction="v" style="flex: 1;">
+        <layout direction="v" gutter="10">
+            <label size="l">Counter: {{value}}</label>
+            <label>Last execution source: {{source || 'Not executed yet'}}</label>
+            <layout gutter="10" wrap>
+                <button @click="add">Add 1</button>
+                <button @click="read">Read counter</button>
+                <button @click="agentGuide">AI access guide</button>
+                <button @click="connectionSettings">Connection settings</button>
+            </layout>
+            <!-- 真实本地 MCP 入口，用户可以复制设置到自己的客户端 -->
+            <label size="l">Native MCP</label>
+            <label>Open Connection settings and configure your MCP client with the URL and Authorization header.</label>
+            <label>Call clickgo_list_apps to choose this app, then clickgo_list_commands with its taskId. Use clickgo_execute_command to run the command below.</label>
+            <text :model-value="mcpCall" readonly type="multi" dir="ltr" style="height: 160px;"></text>
+            <label>MCP calls and buttons update the same counter. Select an app by taskId and run its exposed commands.</label>
+            <label>AI access guide generates browser, HTTP, stdio and CLI instructions for your AI client without exporting credentials.</label>
+            <text :model-value="result" readonly type="multi" dir="ltr" style="height: 160px;"></text>
+        </layout>
+    </flow>
 </form>
