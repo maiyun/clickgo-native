@@ -177,6 +177,12 @@ $ npm run build
 $ npm run native
 ```
 
+## 持久存储
+
+普通 JSON 配置使用 `native.storage.get/set/remove`，敏感字符串使用 `native.secret.get/set/remove`。数据保存在软件的用户数据目录，重启后保留。保存凭据前可用 `await native.secret.isAvailable()` 检查；安全存储不可用时不会退回明文。
+
+读取时，未找到返回 `null`，失败返回 `false`；配置值包装为 `{ value }`，可区分实际保存的 `false` 和 `null`。ClickGo App 使用 `clickgo.native.storage` / `clickgo.native.secret`，首个参数传 `this`，无需 `root` 权限。在 App 的 `config.json` 中设置唯一 `id`，如 `net.example.app`，移动位置和升级时保持不变。同 ID 的实例共用存储，不同 ID 与宿主分开。App 共享宿主页面的信任范围，ID 用于数据分区；缺少或非法 ID 时存储读写返回 `false`。ClickGo Demo 的 **Library native** 提供示例。
+
 ## 本地 MCP
 
 ClickGo Native 通过 Streamable HTTP、stdio MCP 和 CLI 开放 App 命令，与按钮和菜单共用执行逻辑。

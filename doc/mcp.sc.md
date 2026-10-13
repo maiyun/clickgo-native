@@ -65,7 +65,7 @@ export default class extends clickgo.form.AbstractForm {
 | `id` | 根据 Electron 用户数据目录生成 | 稳定的软件标识，如 `com.example.app` |
 | `discovery` | `true` | 允许当前操作系统用户的 CLI/stdio 进程发现连接信息 |
 
-设置和持久化由应用维护。`startMcp()` 返回连接信息；参数无效、监听失败、窗口不存在或重复启动时返回 `false`。
+应用通过[持久存储](README.sc.md#持久存储)保存所需配置。`startMcp()` 返回连接信息；参数无效、监听失败、窗口不存在或重复启动时返回 `false`。
 
 | API | 调用位置 | 返回值 |
 |---|---|---|
@@ -151,6 +151,6 @@ node dist/test/mcp-client.js
 | HTTP 协议 | `npm run test:mcp` |
 | CLI、stdio 和启动 | `npm run test:cli` |
 | 窗口联动 | `npm run test:window` |
-| 打包入口，无系统 Node/显示环境 | `node test/executable.mjs <binary-path> [electron-options]` |
+| 打包入口，无系统 Node/显示环境 | `node dist/abox/test/executable.mjs <binary-path> [electron-options]` |
 
 这些检查用于补充真实 GUI 验收。跨仓库开发遵循 [AGENTS](../AGENTS.md)；对应运行时未发布时，安装本地 ClickGo 构建。

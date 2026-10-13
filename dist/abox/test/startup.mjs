@@ -6,7 +6,7 @@ import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { Client } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
-import { list, lockStart, releaseStart } from '../dist/lib/instance.js';
+import { list, lockStart, releaseStart } from '../../lib/instance.js';
 
 const root = await mkdtemp(join(tmpdir(), 'clickgo-native-startup-'));
 const gui = join(root, 'test-gui.mjs');

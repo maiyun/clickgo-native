@@ -65,7 +65,7 @@ Call `await native.startMcp(options)` after creating the Native window. Every op
 | `id` | Derived from Electron's user-data directory | Stable software identifier, such as `com.example.app` |
 | `discovery` | `true` | Allow this OS user's CLI/stdio processes to discover the current connection |
 
-The application owns settings and persistence. `startMcp()` returns connection information, or `false` for invalid settings, a failed bind, a missing window or a duplicate start.
+The application chooses which settings to persist using [storage and secret](../README.md#persistent-storage). `startMcp()` returns connection information, or `false` for invalid settings, a failed bind, a missing window or a duplicate start.
 
 | API | Context | Result |
 |---|---|---|
@@ -151,6 +151,6 @@ For stdio, use the absolute Electron executable as `command` and `["<absolute-pa
 | HTTP protocol | `npm run test:mcp` |
 | CLI, stdio and startup | `npm run test:cli` |
 | Window integration | `npm run test:window` |
-| Packaged entry without system Node/display | `node test/executable.mjs <binary-path> [electron-options]` |
+| Packaged entry without system Node/display | `node dist/abox/test/executable.mjs <binary-path> [electron-options]` |
 
 These checks complement real GUI acceptance. Cross-repository work follows [AGENTS](../AGENTS.md); install the local ClickGo build when the matching runtime has not been published.

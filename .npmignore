@@ -14,5 +14,7 @@ eslint.config.cjs
 tsconfig.json
 package-lock.json
 
-/dist/test/
-/test/
+/dist/test/**
+
+/dist/abox/test/**
+**/AGENTS.md

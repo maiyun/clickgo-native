@@ -6,9 +6,9 @@ import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { Client } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
-import { version } from '../dist/lib/version.js';
-import { start } from '../dist/lib/mcp.js';
-import { directory, list } from '../dist/lib/instance.js';
+import { version } from '../../lib/version.js';
+import { start } from '../../lib/mcp.js';
+import { directory, list } from '../../lib/instance.js';
 
 const root = await mkdtemp(join(tmpdir(), 'clickgo-native-cli-'));
 const scopedEntry = join(root, 'software-cli.mjs');

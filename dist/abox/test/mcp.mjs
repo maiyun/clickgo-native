@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { request as httpRequest } from 'node:http';
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
-import { version } from '../dist/lib/version.js';
-import { start } from '../dist/lib/mcp.js';
+import { version } from '../../lib/version.js';
+import { start } from '../../lib/mcp.js';
 
 let value = 0;
 let calls = 0;

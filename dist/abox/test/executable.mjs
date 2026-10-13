@@ -7,10 +7,10 @@ import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 import { Client } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
-import { start } from '../dist/lib/mcp.js';
+import { start } from '../../lib/mcp.js';
 
 // --- 传入真实打包的软件路径；可在后面追加测试环境需要的 Electron 参数 ---
-assert.ok(process.argv[2], 'Usage: node test/native-executable.mjs <packaged-executable> [electron-options]');
+assert.ok(process.argv[2], 'Usage: node dist/abox/test/executable.mjs <packaged-executable> [electron-options]');
 const executable = await realpath(process.argv[2]);
 const electronArgs = process.argv.slice(3);
 const root = await mkdtemp(join(tmpdir(), 'clickgo-native-executable-'));

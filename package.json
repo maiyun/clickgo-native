@@ -14,11 +14,13 @@
   "scripts": {
     "build": "tsc && clickgo --app ./dist/test/app",
     "check": "tsc --noEmit --pretty false && eslint \"dist/**/*.ts\" --format stylish",
-    "test:mcp": "node test/version.mjs && node test/mcp.mjs",
-    "test:window": "node --experimental-vm-modules test/window.mjs",
+    "test:mcp": "node dist/abox/test/version.mjs && node dist/abox/test/mcp.mjs",
+    "test:window": "node --experimental-vm-modules dist/abox/test/window.mjs",
+    "test:storage": "node --experimental-vm-modules dist/abox/test/persistence.mjs",
     "native": "electron ./dist/test",
     "sass": "sass --watch dist/:dist/ --style compressed --no-source-map",
-    "test:cli": "node test/cli.mjs && node test/startup.mjs"
+    "test:cli": "node dist/abox/test/cli.mjs && node dist/abox/test/startup.mjs",
+    "test:fs": "node dist/abox/test/fs.mjs"
   },
   "devDependencies": {
     "@litert/eslint-plugin-rules": "^0.3.1",
@@ -33,11 +35,13 @@
     "@modelcontextprotocol/server": "^2.3.1"
   },
   "files": [
-    "dist/**/*.js",
-    "dist/**/*.d.ts",
-    "dist/**/*.cga",
-    "dist/**/*.css",
-    "dist/**/*.html",
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/pre.js",
+    "dist/lib/**/*.js",
+    "dist/lib/**/*.d.ts",
+    "dist/abox/**/*.js",
+    "dist/abox/**/*.d.ts",
     "dist/icon.png",
     "doc/README.sc.md",
     "doc/mcp.md",

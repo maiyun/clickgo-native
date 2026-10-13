@@ -177,6 +177,12 @@ $ npm run build
 $ npm run native
 ```
 
+## Persistent storage
+
+Use `native.storage.get/set/remove` for JSON settings and `native.secret.get/set/remove` for encrypted strings. Data lives in the software's user data directory and survives restart. Check `await native.secret.isAvailable()` before saving credentials; unavailable secure storage never falls back to plaintext.
+
+Reads return `null` for a missing key and `false` for failure. Configuration reads return `{ value }`, so stored `false` and `null` remain distinct. ClickGo Apps use the same APIs as `clickgo.native.storage` / `clickgo.native.secret`, with `this` as the first argument, without `root` permission. Set a unique `id` in the App's `config.json`, such as `net.example.app`; keep it unchanged across moves and upgrades. The same ID shares storage across instances; different IDs and the host have separate storage. Apps share the host page's trust boundary; IDs partition their data. Data operations return `false` without a valid ID. See **Library native** in the ClickGo Demo for examples.
+
 ## Local MCP
 
 ClickGo Native exposes App commands through Streamable HTTP, stdio MCP and CLI, sharing the same execution as buttons and menus.

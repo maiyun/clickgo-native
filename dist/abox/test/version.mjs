@@ -4,9 +4,9 @@ import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { version } from '../dist/lib/version.js';
+import { version } from '../../lib/version.js';
 
-const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+const manifest = JSON.parse(await readFile(new URL('../../../package.json', import.meta.url), 'utf8'));
 assert.equal(version, manifest.version);
 const root = await mkdtemp(join(tmpdir(), 'clickgo-native-version-'));
 try {
@@ -15,7 +15,7 @@ try {
     const library = join(framework, 'dist', 'lib');
     await mkdir(library, { recursive: true });
     await writeFile(join(root, 'package.json'), JSON.stringify({ type: 'module', version: '1.2.3' }));
-    await copyFile(new URL('../dist/lib/version.js', import.meta.url), join(library, 'version.js'));
+    await copyFile(new URL('../../lib/version.js', import.meta.url), join(library, 'version.js'));
     const load = () => execFileSync(process.execPath, ['--input-type=module', '-e',
         `import { version } from ${JSON.stringify(pathToFileURL(join(library, 'version.js')).href)}; process.stdout.write(version);`,
     ], { cwd: root, encoding: 'utf8' });
