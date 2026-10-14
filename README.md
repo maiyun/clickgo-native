@@ -102,7 +102,7 @@ The Native page must provide the ClickGo runtime and load the compiled browser e
 <script type="importmap">
 {
     "imports": {
-        "clickgo": "https://js.maiyun.net/npm/clickgo@6.10.0/dist/index.js"
+        "clickgo": "https://js.maiyun.net/npm/clickgo@x.x.x/dist/index.js"
     }
 }
 </script>

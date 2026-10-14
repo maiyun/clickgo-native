@@ -102,7 +102,7 @@ Native 页面需要提供 ClickGo 运行时，并加载编译后的浏览器入�
 <script type="importmap">
 {
     "imports": {
-        "clickgo": "https://js.maiyun.net/npm/clickgo@6.10.0/dist/index.js"
+        "clickgo": "https://js.maiyun.net/npm/clickgo@7.0.0/dist/index.js"
     }
 }
 </script>
