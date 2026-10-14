@@ -1,6 +1,6 @@
 {
   "name": "clickgo-native",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "The software developed with ClickGo will run in Windows, Mac OS, Linux.",
   "type": "module",
   "keywords": [
@@ -20,19 +20,21 @@
     "native": "electron ./dist/test",
     "sass": "sass --watch dist/:dist/ --style compressed --no-source-map",
     "test:cli": "node dist/abox/test/cli.mjs && node dist/abox/test/startup.mjs",
-    "test:fs": "node dist/abox/test/fs.mjs"
+    "test:fs": "node dist/abox/test/fs.mjs",
+    "test:update": "node --experimental-vm-modules dist/abox/test/update.mjs"
   },
   "devDependencies": {
     "@litert/eslint-plugin-rules": "^0.3.1",
     "@types/node": "^26.5.1",
-    "clickgo": "^7.0.0",
+    "clickgo": "^7.1.0",
     "electron": "^44.3.0",
     "typescript": "^6.0.3"
   },
   "dependencies": {
     "@modelcontextprotocol/client": "^2.3.1",
     "@modelcontextprotocol/node": "^2.1.1",
-    "@modelcontextprotocol/server": "^2.3.1"
+    "@modelcontextprotocol/server": "^2.3.1",
+    "electron-updater": "^6.8.9"
   },
   "files": [
     "dist/index.js",

@@ -60,6 +60,38 @@ native.launcher(new Boot(), {
 
 For frameless ClickGo applications, the first Form synchronizes its `minWidth` and `minHeight` to the native window, including subsequent changes. System close requests (such as Alt+F4) are forwarded to that Form's `close` event. Call `event.preventDefault()` synchronously before showing an asynchronous ClickGo confirmation, then close the Form after confirmation. Explicit `native.close()` and `native.quit()` are final, authorized close actions and do not repeat the confirmation. These integrations require the corresponding updated ClickGo runtime as well as ClickGo Native.
 
+## Software updates
+
+Enable updates in the main process with `native.launcher(new Boot(), { updates: true })` (default: false). The source comes from the application's `build.publish`; no custom IPC or renderer-provided URL is needed. `electron-updater` is a ClickGo Native runtime dependency and loads only for an enabled, installed GUI application. Development and Windows portable builds return `disabled`.
+
+```typescript
+// App/Form with root permission. Obtain user confirmation before download/install.
+const state = await clickgo.native.checkUpdates(this);
+if (state && state.status === 'available') {
+    const downloaded = await clickgo.native.downloadUpdate(this);
+    if (downloaded && downloaded.status === 'downloaded') {
+        // Save documents and obtain restart confirmation first.
+        await clickgo.native.installUpdate(this);
+    }
+}
+clickgo.native.onUpdateState(this, state => {
+    // state.progress: percent, transferred/total bytes, bytesPerSecond.
+    // install-failed: unlock editing and allow retry.
+});
+```
+
+`getUpdateState(this)` reads the current state. Control/read calls return `false` for denied permission or expired tasks, `null` for browser/older hosts, otherwise `IUpdateState`. Subscriptions need no root permission and clear with the Form/Task. Main-process equivalents are exported by `clickgo-native`; its `onUpdateState(handler)` returns an unsubscribe function. Update states contain no source URL, credentials or installer path.
+
+Concurrent checks/downloads share one operation. A downloaded version stays fixed until restart; failed downloads cannot be installed. Downloads and installation are manual, and quitting does not install automatically. `restarting` means the installer was started; a later `errorCode: 'install-failed'` restores close confirmation and lets the App resume editing. Actual platform installation requires release acceptance tests.
+
+Configure a provider in the application's `package.json`:
+
+```json
+{ "build": { "publish": { "provider": "github", "owner": "YOUR_OWNER", "repo": "YOUR_REPO" } } }
+```
+
+For a website, use `{ "provider": "generic", "url": "https://updates.example.com/app/" }`. Publish the installer, generated platform metadata (`latest*.yml`) and auxiliary files together; generic providers require uploading them yourself. macOS requires signed artifacts and a ZIP for auto-update. See [electron-builder auto-update](https://www.electron.build/docs/features/auto-update/).
+
 ## Build a ClickGo Application as a Native Package
 
 The application project does not need to install `electron` directly when using ClickGo Compiler to run and package it. The compiler supplies the Electron runtime. Native main-process code can use `native.getAppVersion()` to read the application's `package.json` version and `native.isPackaged()` to distinguish a packaged application from development runs. These APIs do not expose Electron to the HTML page.

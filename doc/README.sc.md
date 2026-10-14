@@ -60,6 +60,22 @@ native.launcher(new Boot(), {
 
 对于无边框的 ClickGo 应用，首个 Form 会将 `minWidth` 和 `minHeight` 同步到原生窗口，之后修改这些值也会同步。系统关闭请求（例如 Alt+F4）会转发到该 Form 的 `close` 事件。如需显示异步的 ClickGo 确认界面，应先同步调用 `event.preventDefault()`，确认后再关闭 Form。显式调用 `native.close()` 或 `native.quit()` 表示已经授权的最终关闭操作，不会再次触发确认。使用这些联动功能时，需要同时更新 ClickGo 运行时和 ClickGo Native。
 
+## 软件更新
+
+主进程用 `native.launcher(new Boot(), { updates: true })` 显式启用，默认 false。更新源来自软件 `build.publish`，业务不注册更新 IPC，也不传入 URL。`electron-updater` 是 Native 的运行依赖，仅在已启用、已安装的 GUI 软件中延迟加载；开发和 Windows portable 返回 `disabled`。
+
+App/Form 使用 `clickgo.native.checkUpdates(this)`、`downloadUpdate(this)`、`installUpdate(this)` 和 `getUpdateState(this)`，要求 root；无权限/任务失效返回 false，网页/旧宿主返回 null，其余返回 `IUpdateState`。通过 `onUpdateState(this, handler)` 监听状态及下载进度，不要求 root，Form/Task 销毁时自动清理。主进程从 clickgo-native 使用同名接口，`onUpdateState(handler)` 返回取消订阅函数。公开状态不含 URL、凭据和安装路径。
+
+检测与下载合并并发请求，下载后固定安装版本；失败的下载不能安装。不自动下载或退出时安装，业务须在下载前确认，在安装前保存文档并确认重启。`restarting` 表示已启动安装器；后续 `errorCode: 'install-failed'` 恢复关闭确认，App 应恢复编辑和重试。下载进度的 percent 为 0–100，transferred/total 为字节，bytesPerSecond 为字节/秒。实际平台安装仍须发布验收。
+
+GitHub 配置示例：
+
+```json
+{ "build": { "publish": { "provider": "github", "owner": "YOUR_OWNER", "repo": "YOUR_REPO" } } }
+```
+
+网站使用 `{ "provider": "generic", "url": "https://updates.example.com/app/" }`。上传安装包、生成的平台元数据 `latest*.yml` 及辅助文件；generic 由发布方自行上传，macOS 需要签名和 ZIP。配置与发布要求见 [electron-builder 更新文档](https://www.electron.build/docs/features/auto-update/)。
+
 ## 将 ClickGo 应用打包为原生软件
 
 使用 ClickGo Compiler 运行和打包时，应用项目无需直接安装 `electron`，编译器会提供 Electron 运行环境。Native 主进程可以通过 `native.getAppVersion()` 读取应用 `package.json` 中的版本，通过 `native.isPackaged()` 区分已打包的软件和开发运行。这些 API 不会将 Electron 暴露给 HTML 页面。
