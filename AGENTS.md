@@ -14,7 +14,7 @@
 
 ## 与 ClickGo 测试副本同步
 
-- 本仓库 `dist/index.ts` 必须与 ClickGo 仓库 `dist/test/native/native.ts` 逐字一致；`dist/lib/{fs,tool,mcp,instance,client,cli,startup,version,persistence,storage,secret,update}.ts` 及手写 `dist/pre.js` 及 `dist/abox/{fs,tool,persistence,cli,update}.ts` 也同步对应的 ClickGo `dist/test/native/` 文件；不要独立维护两套实现。
+- 本仓库 `dist/index.ts` 必须与 ClickGo 仓库 `dist/test/native/native.ts` 逐字一致；`dist/lib/{fs,tool,mcp,instance,client,cli,startup,version,persistence,storage,secret,update,events}.ts` 及手写 `dist/pre.js` 及 `dist/abox/{fs,tool,persistence,cli,update}.ts` 也同步对应的 ClickGo `dist/test/native/` 文件；不要独立维护两套实现。
 - Native 功能先在 ClickGo 的测试副本中开发，完成 `npx tsc`、`npm run check`、`npm run test:native` 及真实 Electron Demo 联动后，才同步到本仓库。详细入口与模式见 ClickGo 的 AGENTS。
 - 同步后在本仓库运行 `npm run build`、`npm run check`、`npm run test:window`、`npm run test:mcp`，并用 `cmp` 核对对应源码；JS/类型声明使用构建生成。新增模块时核对配套文件和两边依赖声明，不能只同步主入口。
 
@@ -31,3 +31,5 @@
 - launcher 的 commandAutoStart 默认 false；启用时只有需要 GUI 的命令请求才按需启动，帮助、instances、MCP 握手及 tools/list 不启动。启动前保持安装归属，私有启动锁合并并发请求，等待 App 就绪有上限；拉起后启动锁交给 GUI，取消或超时只释放本次等待。后续请求继续等待同一 GUI，就绪后清理启动锁，GUI 异常退出后可重新启动；不关闭 GUI，也不回放修改。启动回归见 dist/abox/test/startup.mjs。
 
 - 软件更新由 launcher 的 updates 显式启用（默认 false），lib/update.ts 管理软件级状态/并发/安装目标，abox/update.ts 延迟加载 electron-updater；更新源取自消费软件 build.publish。页面 checkUpdates/downloadUpdate/installUpdate/getUpdateState 要求 root，onUpdateState 只发布公开状态并随 Form/Task 销毁清理。业务负责下载/安装确认及保存；禁止自动下载、退出时安装、网页传地址或安装路径。开发/portable 禁用，CLI/stdio 不初始化更新器。安装异步失败恢复关闭确认；回归 test:update（ClickGo 为 test:native）。
+
+- Native 系统事件：onLaunch(event) 接收普通 GUI 首次/再次启动的 args、原生 cwd 和 requestId；onOpenFiles(paths, info) 保持单参数回调兼容，info.source 为 startup/second-instance/association/drop，同一次启动共用 requestId。ClickGo Boot/App/Form 用 onNativeLaunch/onNativeOpenFiles，App/Form 须 root；宿主 main 须 await 初始 task.run，完成后框架自动拉取暂存事件。两侧独立通知，不默认消费/取消对方；业务动作由软件选择一处执行。固定会话桥接 cg-native-events 不接受网页投递请求，CLI/stdio 不发普通 GUI 事件，未取走事件跨导航暂存，已取走事件不重放。验证 Native window 与 ClickGo test:native。

@@ -60,6 +60,27 @@ native.launcher(new Boot(), {
 
 For frameless ClickGo applications, the first Form synchronizes its `minWidth` and `minHeight` to the native window, including subsequent changes. System close requests (such as Alt+F4) are forwarded to that Form's `close` event. Call `event.preventDefault()` synchronously before showing an asynchronous ClickGo confirmation, then close the Form after confirmation. Explicit `native.close()` and `native.quit()` are final, authorized close actions and do not repeat the confirmation. These integrations require the corresponding updated ClickGo runtime as well as ClickGo Native.
 
+## Native system events
+
+Requires ClickGo 7.2 / ClickGo Native 3.2. Main-process `Boot.onLaunch(event)` receives ordinary GUI startup and second-instance requests. `event` contains `args` (executable/development entry removed), native `cwd`, `source` (`startup`/`second-instance`) and a process-local `requestId`. CLI/stdio modes remain separate. Native callbacks may run before Boot.main/Electron readiness and do not block startup; create windows in Boot.main.
+
+With `launcher({ openFiles: true })`, `Boot.onOpenFiles(paths, info)` receives existing regular files from startup, second instance, association or native drop. `info.source` distinguishes those four origins; a launch and its file notification share `requestId`. Paths use ClickGo absolute-path format without `/storage/`. Existing one-argument callbacks remain compatible.
+
+ClickGo Boot/App/Form receive `onNativeLaunch(event)` and `onNativeOpenFiles(paths, info)` as system global callbacks; App/Form need root permission. Native and ClickGo listeners receive independent copies and do not cancel each other. Choose one receiver for each business action. The browser Boot must await initial App setup (`task.run`); queued events are delivered automatically after `Boot.main()` completes. Ending tasks/closed Forms are excluded; new receivers do not replay previously delivered requests. No business `emit`, custom IPC or polling is required.
+
+```typescript
+// Native Boot
+public onOpenFiles(paths: string[], info: native.INativeOpenFilesInfo): void {
+    // Handle here if the main process owns this business operation.
+}
+
+// ClickGo Form, App or browser Boot
+public onNativeOpenFiles(paths: string[], info: clickgo.native.INativeOpenFilesInfo): void {
+    // info.source: startup | second-instance | association | drop.
+    // Confirm unsaved changes and open here if the App owns the operation.
+}
+```
+
 ## Software updates
 
 Enable updates in the main process with `native.launcher(new Boot(), { updates: true })` (default: false). The source comes from the application's `build.publish`; no custom IPC or renderer-provided URL is needed. `electron-updater` is a ClickGo Native runtime dependency and loads only for an enabled, installed GUI application. Development and Windows portable builds return `disabled`.

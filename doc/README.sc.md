@@ -60,6 +60,14 @@ native.launcher(new Boot(), {
 
 对于无边框的 ClickGo 应用，首个 Form 会将 `minWidth` 和 `minHeight` 同步到原生窗口，之后修改这些值也会同步。系统关闭请求（例如 Alt+F4）会转发到该 Form 的 `close` 事件。如需显示异步的 ClickGo 确认界面，应先同步调用 `event.preventDefault()`，确认后再关闭 Form。显式调用 `native.close()` 或 `native.quit()` 表示已经授权的最终关闭操作，不会再次触发确认。使用这些联动功能时，需要同时更新 ClickGo 运行时和 ClickGo Native。
 
+## Native 系统事件
+
+要求 ClickGo 7.2 / ClickGo Native 3.2。主进程 `Boot.onLaunch(event)` 接收普通 GUI 首次及再次启动请求，event 含 args（去掉可执行文件/开发入口）、原生 cwd、source（startup/second-instance）及进程内 requestId；CLI/stdio 单独处理。Native 回调可能早于 Boot.main/Electron 就绪，且不阻塞启动；窗口操作放 Boot.main。
+
+启用 `launcher({ openFiles: true })` 后，`Boot.onOpenFiles(paths, info)` 接收已有普通文件。info.source 为 startup、second-instance、association 或 drop；同一次启动的参数/文件通知共用 requestId。paths 为不含 `/storage/` 的 ClickGo 绝对路径，原有单参数回调兼容。
+
+ClickGo Boot/App/Form 使用全局回调 `onNativeLaunch(event)`、`onNativeOpenFiles(paths, info)`，App/Form 要求 root。两侧取得独立副本，不取消对方；同一业务动作自行选择一处执行。浏览器 Boot 须 await 初始 task.run，Boot.main 完成后框架自动投递暂存请求；退出中的任务和已关闭 Form 不接收，后来创建的接收方不重放已投递请求。业务不再注册转发事件、IPC 或轮询。
+
 ## 软件更新
 
 主进程用 `native.launcher(new Boot(), { updates: true })` 显式启用，默认 false。更新源来自软件 `build.publish`，业务不注册更新 IPC，也不传入 URL。`electron-updater` 是 Native 的运行依赖，仅在已启用、已安装的 GUI 软件中延迟加载；开发和 Windows portable 返回 `disabled`。
