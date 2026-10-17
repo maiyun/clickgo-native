@@ -119,6 +119,12 @@ Guides omit transient IDs and credentials by default. To export HTTP settings, u
 
 Regenerate the executable entry after moving or reinstalling. Startup is `existing` by default, or `auto` with commandAutoStart; args preserve explicitly used sandbox switches. The client needs support for the chosen entrypoint.
 
+## Exported files
+
+An App can return its native export Blob with ClickGo's `context.createFile(blob, { fileName, mimeType? })` and `success(data, [file])`. HTTP and stdio tool results retain the JSON metadata and add standard `resource_link` content. Read its URI with `resources/read` to receive the exact file bytes; no filesystem path or public download URL is required.
+
+Files expire after 10 minutes or when their owning Panel, Form or App closes. Resource reads use the same App's public `clickgo.file.read` command, preserving isolation, cancellation and lifecycle checks. Clients without resource support can use that command with `fileId`, byte `offset` and `length` from `readChunkSize`, decode each Base64 segment and append bytes until `nextOffset` is null. Missing browser download events are not export failures. This requires the ClickGo runtime with command file support; older runtime results keep their existing JSON behavior.
+
 ## Execution and local discovery
 
 Native forwards requests to the selected App through `executeAgent()`. CLI and stdio use the internal HTTP client; the stdio adapter is a server to the AI and a client to Native. Apps register business commands, while the framework supplies the protocol adapters. `createBridge()` is for modules that stay bound to one App. Ordinary webpages use JS/WebMCP and do not start a local HTTP service.

@@ -119,6 +119,12 @@ export default class extends clickgo.form.AbstractForm {
 
 迁移或重装后重新生成程序入口；startup 默认为 `existing`，开启 commandAutoStart 后为 `auto`，args 保留显式使用的沙箱选项；客户端须支持所选入口。
 
+## 导出文件
+
+App 使用 ClickGo 的 `context.createFile(blob, { fileName, mimeType? })` 和 `success(data, [file])` 交付内置导出器生成的 Blob。HTTP 和 stdio 工具结果保留 JSON 元数据，并增加标准 `resource_link`；客户端通过 `resources/read` 读取同一份文件字节，不需要文件系统路径或公网下载地址。
+
+文件在 10 分钟后或所属 Panel、Form、App 关闭时释放。资源读取仍调用同一 App 的公开 `clickgo.file.read` 命令，保留隔离、取消和生命周期校验。不支持资源的客户端可使用该命令，传入 `fileId`、字节偏移 `offset` 和 `readChunkSize` 指定的 `length`，逐段解码 Base64 并拼接字节，直到 `nextOffset` 为 null。捕获不到浏览器下载事件不代表生成失败。此能力要求搭配支持命令文件的 ClickGo 运行时；旧运行时结果继续沿用原有 JSON 行为。
+
 ## 执行链路与本机发现
 
 Native 通过 `executeAgent()` 将请求转发给目标 App。CLI 和 stdio 使用内部 HTTP 客户端，stdio 接入进程面对 AI 是服务端，面对 Native 是客户端；业务 App 注册命令，框架提供协议适配器。`createBridge()` 用于持续绑定一个 App 的模块；普通网页使用 JS/WebMCP，不启动本地 HTTP 服务。

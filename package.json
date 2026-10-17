@@ -26,7 +26,7 @@
   "devDependencies": {
     "@litert/eslint-plugin-rules": "^0.3.1",
     "@types/node": "^26.5.1",
-    "clickgo": "^7.2.0",
+    "clickgo": "^7.3.2",
     "electron": "^44.3.0",
     "typescript": "^6.0.3"
   },

@@ -2,7 +2,7 @@
 
 这是 ClickGo 的 Electron 桌面宿主，包名为 `clickgo-native`。
 
-- 三箱：`dist/abox/{fs,tool,persistence,cli,update}.ts` 实现文件系统、路径转换、私有记录读写/JSON 校验和 CLI 参数读取；`dist/lib/` 保留契约、存储空间选择及串行/失败流程，主进程保留 IPC 授权、窗口生命周期及命令启动决策。运行代码直接加载，发布必须保留 abox 的 JS 与声明；`dist/abox/test/` 不发布，`dist/test/` 保留 Electron/Demo 宿主。
+- 三箱：`dist/abox/{fs,tool,mcp,persistence,cli,update}.ts` 实现文件系统、路径转换、MCP 文件资源适配、私有记录读写/JSON 校验和 CLI 参数读取；`dist/lib/` 保留契约、存储空间选择及串行/失败流程，主进程保留 IPC 授权、窗口生命周期及命令启动决策。运行代码直接加载，发布必须保留 abox 的 JS 与声明；`dist/abox/test/` 不发布，`dist/test/` 保留 Electron/Demo 宿主。
 - 主进程源码在 `dist/index.ts`，`dist/pre.js` 是手写的隔离预加载脚本；同名 `.js`/`.d.ts` 和测试 `.cga` 使用构建生成。
 - 本地 MCP 的传输与认证在 `dist/lib/mcp.ts`；`dist/index.ts` 负责当前主文档会话检查和固定命令转发。页面端适配器在 ClickGo 仓库的 `dist/lib/command/native.ts`，直接按 taskId 调用 `executeAgent()` 进入共享执行器，只允许公开命令。不要为每次请求创建绑定 App 的桥接，也不要复制业务执行函数或开放任意脚本调用。
 - MCP 由宿主显式 `startMcp()` 启用，关闭窗口时停止；只监听本机，连接令牌仅用于客户端设置，不写日志或默认界面。页面读取设置沿用 ClickGo 的 root 权限检查。
@@ -14,7 +14,7 @@
 
 ## 与 ClickGo 测试副本同步
 
-- 本仓库 `dist/index.ts` 必须与 ClickGo 仓库 `dist/test/native/native.ts` 逐字一致；`dist/lib/{fs,tool,mcp,instance,client,cli,startup,version,persistence,storage,secret,update,events}.ts` 及手写 `dist/pre.js` 及 `dist/abox/{fs,tool,persistence,cli,update}.ts` 也同步对应的 ClickGo `dist/test/native/` 文件；不要独立维护两套实现。
+- 本仓库 `dist/index.ts` 必须与 ClickGo 仓库 `dist/test/native/native.ts` 逐字一致；`dist/lib/{fs,tool,mcp,instance,client,cli,startup,version,persistence,storage,secret,update,events}.ts` 及手写 `dist/pre.js` 及 `dist/abox/{fs,tool,mcp,persistence,cli,update}.ts` 也同步对应的 ClickGo `dist/test/native/` 文件；不要独立维护两套实现。
 - Native 功能先在 ClickGo 的测试副本中开发，完成 `npx tsc`、`npm run check`、`npm run test:native` 及真实 Electron Demo 联动后，才同步到本仓库。详细入口与模式见 ClickGo 的 AGENTS。
 - 同步后在本仓库运行 `npm run build`、`npm run check`、`npm run test:window`、`npm run test:mcp`，并用 `cmp` 核对对应源码；JS/类型声明使用构建生成。新增模块时核对配套文件和两边依赖声明，不能只同步主入口。
 
